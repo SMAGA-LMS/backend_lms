@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Http\Resources\UserResource;
@@ -60,5 +61,43 @@ class UserController extends Controller
 
         //return response
         return new UserResource(true, 'New User added', $users);
+    }
+
+    public function show($id)
+    {
+        //find post by ID
+        $user = User::find($id);
+
+        //return single post as a resource
+        if($user==null){
+            return new UserResource(false, 'User not found', $user);
+        }
+        else{
+            return new UserResource(true, 'Detail User', $user);
+        }
+
+    }
+
+    public function login(Request $request){
+        //find post by ID
+        $id = $request->id;
+        $user = User::find($id);
+        $pw = $request->password;
+
+        // if(Auth::attempt(['id'=>$id, 'password'=>$request->password])){
+        //     return new UserResource(true, 'Detail User', $user);
+        // }
+
+        if($user == NULL){
+            return new UserResource(false, 'User not found', $id);
+        }
+        else if(!Hash::check($pw, $user->password)){
+            return new UserResource(false, 'Wrong password', $pw);
+        }
+        else{
+            //return single post as a resource
+            return new UserResource(true, 'Logged in', $user);
+        }
+
     }
 }
