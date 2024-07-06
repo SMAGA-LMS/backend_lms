@@ -10,3 +10,10 @@ Route::get('/user', function (Request $request) {
 Route::apiResource('/users', App\Http\Controllers\Api\UserController::class);
 
 Route::post('/users/login', [App\Http\Controllers\Api\UserController::class, 'login']);
+
+Route::post('/users/admins', [App\Http\Controllers\Api\UserController::class, 'adminList']);
+
+Route::post('/users/students', [App\Http\Controllers\Api\UserController::class, 'studentList']);
+
+Route::post('/users/teachers', [App\Http\Controllers\Api\UserController::class, 'teacherList']);
+

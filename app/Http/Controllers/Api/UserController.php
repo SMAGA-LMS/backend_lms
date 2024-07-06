@@ -79,6 +79,16 @@ class UserController extends Controller
     }
 
     public function login(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'id'      => 'required',
+            'password'     => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
         //find post by ID
         $id = $request->id;
         $user = User::find($id);
@@ -97,6 +107,45 @@ class UserController extends Controller
         else{
             //return single post as a resource
             return new UserResource(true, 'Logged in', $user);
+        }
+
+    }
+
+    public function adminList()
+    {
+        //get users
+        $users = DB::table('users')->where('role', 'Admin')->get();
+
+        //return collection of users as a resource
+        return new UserResource(true, 'List Data User', $users);
+    }
+
+    public function studentList()
+    {
+        //get users
+        $users = DB::table('users')->where('role', 'Student')->get();
+
+        if(empty($users)){
+            return new UserResource(false, 'No Students found', $users);
+        }
+        else{
+            //return collection of users as a resource
+            return new UserResource(true, 'List Data Student', $users);
+        }
+
+    }
+
+    public function teacherList()
+    {
+        //get users
+        $users = DB::table('users')->where('role', 'Teacher')->get();
+
+        if($users == null){
+            return new UserResource(false, 'No Teachers found', $users);
+        }
+        else{
+            //return collection of users as a resource
+            return new UserResource(true, 'List Data Teacher', $users);
         }
 
     }
