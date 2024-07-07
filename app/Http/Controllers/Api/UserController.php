@@ -18,7 +18,7 @@ class UserController extends Controller
     public function index()
     {
         //get users
-        $users = User::latest()->paginate(5);
+        $users = User::all();
 
         //return collection of users as a resource
         return new UserResource(true, 'List Data User', $users);
@@ -125,7 +125,7 @@ class UserController extends Controller
         //get users
         $users = DB::table('users')->where('role', 'Student')->get();
 
-        if(empty($users)){
+        if($users == "[]"){
             return new UserResource(false, 'No Students found', $users);
         }
         else{
@@ -140,7 +140,7 @@ class UserController extends Controller
         //get users
         $users = DB::table('users')->where('role', 'Teacher')->get();
 
-        if($users == null){
+        if($users == "[]"){
             return new UserResource(false, 'No Teachers found', $users);
         }
         else{
