@@ -11,6 +11,7 @@ Route::get('/user', function (Request $request) {
 Route::apiResource('/users', App\Http\Controllers\Api\UserController::class);
 Route::apiResource('/classes', App\Http\Controllers\Api\ClassroomController::class);
 Route::apiResource('/studentenrollment', App\Http\Controllers\Api\StudentEnrollmentController::class);
+Route::apiResource('/courses', App\Http\Controllers\Api\CourseController::class);
 
 //user
 Route::post('/users/login', [App\Http\Controllers\Api\UserController::class, 'login']);
@@ -21,3 +22,6 @@ Route::post('/users/teachers', [App\Http\Controllers\Api\UserController::class, 
 //student enrollment
 Route::post('/studentenrollment/class', [App\Http\Controllers\Api\StudentEnrollmentController::class, 'studentList']);
 Route::post('/studentenrollment/studentclass', [App\Http\Controllers\Api\StudentEnrollmentController::class, 'studentClassroom']);
+
+//course
+Route::post('/courses/teacher', [App\Http\Controllers\Api\CourseController::class, 'courseTeacherList']);
