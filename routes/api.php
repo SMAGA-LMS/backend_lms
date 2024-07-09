@@ -25,3 +25,4 @@ Route::post('/studentenrollment/studentclass', [App\Http\Controllers\Api\Student
 
 //course
 Route::post('/courses/teacher', [App\Http\Controllers\Api\CourseController::class, 'courseTeacherList']);
+Route::post('/courses/grade', [App\Http\Controllers\Api\CourseController::class, 'courseGradeList']);

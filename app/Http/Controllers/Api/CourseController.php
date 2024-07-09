@@ -62,4 +62,80 @@ class CourseController extends Controller
         }
 
     }
+
+    public function courseGradeList(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'grade'      => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        //get users
+         $course = DB::table('courses')->where('grade', $request->grade)->get();
+        // $course = Course::where('user_id', $request->user_id);
+
+        if($course == "[]"){
+            return new CourseResource(false, 'No Courses found', $course);
+        }
+        else{
+            //return collection of users as a resource
+            return new CourseResource(true, 'Courses with desired grade', $course);
+        }
+
+    }
+
+    public function store(Request $request)
+    {
+        //define validation rules
+        $validator = Validator::make($request->all(), [
+            'name'     => 'required',
+            'user_id' => 'string',
+            'grade' => 'required',
+        ]);
+
+        //check if validation fails
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $teacher = $request->user_id;
+
+        if($teacher == null){
+            $teacher == "null";
+        }
+
+        //create class
+        $course = Course::create([
+            'user_id'     => $request->user_id,
+            'name' => $request->name,
+            'grade' => $request->grade,
+        ]);
+
+        //return response
+        return new CourseResource(true, 'New Student-Class added', $course);
+    }
+
+    public function update(Request $request, $id)
+    {
+        //define validation rules
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required',
+        ]);
+
+        //check if validation fails
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $course = Course::find($id);
+        $course->update([
+            'user_id' => $request->user_id,
+        ]);
+
+        //return response
+        return new CourseResource(true, 'New Teacher added', $course);
+    }
 }
