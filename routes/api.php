@@ -12,6 +12,7 @@ Route::apiResource('/users', App\Http\Controllers\Api\UserController::class);
 Route::apiResource('/classes', App\Http\Controllers\Api\ClassroomController::class);
 Route::apiResource('/studentenrollment', App\Http\Controllers\Api\StudentEnrollmentController::class);
 Route::apiResource('/courses', App\Http\Controllers\Api\CourseController::class);
+Route::apiResource('/classenrollment', App\Http\Controllers\Api\ClassEnrollmentController::class);
 
 //user
 Route::post('/users/login', [App\Http\Controllers\Api\UserController::class, 'login']);
@@ -26,3 +27,8 @@ Route::post('/studentenrollment/studentclass', [App\Http\Controllers\Api\Student
 //course
 Route::post('/courses/teacher', [App\Http\Controllers\Api\CourseController::class, 'courseTeacherList']);
 Route::post('/courses/grade', [App\Http\Controllers\Api\CourseController::class, 'courseGradeList']);
+
+//class enrollment
+Route::post('/classenrollment/class', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getCoursesClassID']);
+Route::post('/classenrollment/classlist', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getCoursesClassIDList']);
+Route::post('/classenrollment/course', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getClassesCourseID']);

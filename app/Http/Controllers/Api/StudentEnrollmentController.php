@@ -23,21 +23,6 @@ class StudentEnrollmentController extends Controller
         return new StudentEnrollmentResource(true, 'List Data Student-Class', $classes);
     }
 
-    // public function show($id)
-    // {
-    //     //find class by ID
-    //     $class = Classroom::find($id);
-
-    //     //return single post as a resource
-    //     if($class==null){
-    //         return new ClassroomResource(false, 'User not found', $class);
-    //     }
-    //     else{
-    //         return new ClassroomResource(true, 'Detail User', $class);
-    //     }
-
-    // }
-
     public function store(Request $request)
     {
         //define validation rules
