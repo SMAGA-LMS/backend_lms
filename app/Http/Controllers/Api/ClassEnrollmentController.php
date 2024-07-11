@@ -80,4 +80,27 @@ class ClassEnrollmentController extends Controller
 
     }
 
+    public function store(Request $request)
+    {
+        //define validation rules
+        $validator = Validator::make($request->all(), [
+            'course_id'      => 'required',
+            'classroom_id'     => 'required',
+        ]);
+
+        //check if validation fails
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        //create class
+        $classes = ClassEnrollment::create([
+            'course_id'     => $request->course_id,
+            'classroom_id' => $request->classroom_id,
+        ]);
+
+        //return response
+        return new ClassEnrollmentResource(true, 'New Class-Course added', $classes);
+    }
+
 }
