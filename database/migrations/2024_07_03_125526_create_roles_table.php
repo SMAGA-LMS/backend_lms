@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -11,15 +12,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Schema::create('courses', function (Blueprint $table) {
+        // Schema::create('roles', function (Blueprint $table) {
         //     $table->id();
-        //     $table->string('name');
-        //     $table->unsignedBigInteger('user_id')->nullable();
-        //     $table->string('grade');
         //     $table->timestamps();
-
-        //     $table->foreign('user_id')->references('id')->on('users');
         // });
+
+        DB::statement(
+            'CREATE TABLE roles(
+                id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+                role_name VARCHAR(16) NOT NULL UNIQUE,
+                created_at TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP NULL
+            )'
+        );
     }
 
     /**
@@ -27,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::dropIfExists('courses');
+        Schema::dropIfExists('roles');
     }
 };

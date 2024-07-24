@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Models;
+// namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+// use Illuminate\Database\Eloquent\Factories\HasFactory;
+// use Illuminate\Database\Eloquent\Model;
 
-class Classroom extends Model
-{
-    use HasFactory;
+// class Classroom extends Model
+// {
+//     use HasFactory;
 
-    public $table = 'classrooms';
+//     public $table = 'classrooms';
 
-    protected $fillable = [
-        'name',
-        'grade',
-    ];
-}
+//     protected $fillable = [
+//         'name',
+//         'grade',
+//     ];
+// }
