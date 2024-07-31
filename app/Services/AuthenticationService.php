@@ -90,7 +90,7 @@ class AuthenticationService
             message: "User Successfully Logout",
             errors: [],
             data: [],
-            codeResponse: 200
+            codeResponse: 204
         );
     }
 
