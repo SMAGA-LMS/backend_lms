@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\DataTransferObjects\AuthResponseDTO;
+use App\Helpers\ApiResponseHelper;
+use App\Http\Resources\AuthenticationResource;
 use App\Http\Resources\ValidationErrorResource;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -28,17 +31,36 @@ class LoginRequest extends FormRequest
     {
         return [
             'username' => 'required',
-            'password' => 'required',
+            'password' => 'required'
         ];
+    }
+
+    protected $apiResponse;
+
+    public function __construct(ApiResponseHelper $apiResponse)
+    {
+        parent::__construct();
+        $this->apiResponse = $apiResponse;
     }
 
     protected function failedValidation(Validator $validator)
     {
-        $isSuccess = false;
-        $errorsMessage = $validator->errors()->messages();
-        $response = (
-            new ValidationErrorResource($isSuccess, $errorsMessage)
-        )->response()->setStatusCode(422);
+        $response = $this->apiResponse->errorResponse(
+            message: "Validation error.",
+            errors: $validator->errors()->toArray(),
+            codeResponse: 422
+        );
+
+        throw new HttpResponseException($response);
+    }
+
+    protected function failedAuthorization()
+    {
+        $response = $this->apiResponse->errorResponse(
+            message: "Authorization failed. User are already logged in.",
+            errors: [],
+            code: 403
+        );
 
         throw new HttpResponseException($response);
     }

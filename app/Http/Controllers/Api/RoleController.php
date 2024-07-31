@@ -1,12 +1,38 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api;
 
+use App\Helpers\ApiResponseHelper;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\RoleResource;
 use App\Models\Role;
+use App\Services\RoleService;
 use Illuminate\Http\Request;
 
 class RoleController extends Controller
 {
+
+    protected $roleService;
+    protected $apiResponse;
+
+    public function __construct(RoleService $roleService, ApiResponseHelper $apiResponse)
+    {
+        $this->roleService = $roleService;
+        $this->apiResponse = $apiResponse;
+    }
+
+
+    public function getRoleList(Request $request)
+    {
+        $result = $this->roleService->getAllRoles();
+
+        return $this->apiResponse->successResponse(
+            message: $result->message,
+            data: RoleResource::collection($result->data),
+            codeResponse: $result->codeResponse
+        );
+    }
+
     /**
      * Display a listing of the resource.
      */

@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -13,10 +14,18 @@ return new class extends Migration
     {
         // Schema::create('classrooms', function (Blueprint $table) {
         //     $table->id();
-        //     $table->string('name');
-        //     $table->string('grade');
         //     $table->timestamps();
         // });
+
+        DB::statement(
+            'CREATE TABLE classrooms (
+                id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+
+                name VARCHAR(32) NOT NULL UNIQUE,
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP NULL
+            )'
+        );
     }
 
     /**
@@ -24,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Schema::dropIfExists('classrooms');
+        Schema::dropIfExists('classrooms');
     }
 };

@@ -1,18 +1,23 @@
 <?php
 
-// namespace App\Models;
+namespace App\Models;
 
-// use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
-// class Classroom extends Model
-// {
-//     use HasFactory;
+class Classroom extends Model
+{
+    use HasFactory;
 
-//     public $table = 'classrooms';
+    protected $guarded = [
+        'id'
+    ];
 
-//     protected $fillable = [
-//         'name',
-//         'grade',
-//     ];
-// }
+    /**
+     * Get the grade_classroom associated with the classroom.
+     */
+    public function gradeClassroom()
+    {
+        return $this->hasMany(GradeClassroom::class);
+    }
+}

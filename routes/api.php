@@ -1,6 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\AcademicTermController;
 use App\Http\Controllers\Api\AuthenticationController;
+use App\Http\Controllers\Api\ClassPeriodController;
+use App\Http\Controllers\Api\GradeClassroomController;
+use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\Api\StudentEnrollmentController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,18 +25,40 @@ use Illuminate\Support\Facades\Route;
 // biar ga harus nulis /users setiap route end point nya, karena udah di-group dari parent nya (prefix) otomatis jadi /users/login, dst
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthenticationController::class, 'login']);
-    Route::post('/logout', [AuthenticationController::class, 'logout'])->middleware('auth:sanctum');
+    Route::post('/logout', [AuthenticationController::class, 'logout'])->middleware(['auth:sanctum']);
+    Route::get('/me', [AuthenticationController::class, 'authMe'])->middleware(['auth:sanctum']);
 });
+// Route::post('/users/login', [App\Http\Controllers\Api\UserController::class, 'login']);
 
 
 //user
-// Route::post('/users/login', [App\Http\Controllers\Api\UserController::class, 'login']);
-// Route::post('/users/admins', [App\Http\Controllers\Api\UserController::class, 'adminList']);
-// Route::post('/users/students', [App\Http\Controllers\Api\UserController::class, 'studentList']);
-// Route::post('/users/teachers', [App\Http\Controllers\Api\UserController::class, 'teacherList']);
+Route::prefix('users')->group(function () {
+    Route::get('/', [UserController::class, 'getUserList'])->middleware(['auth:sanctum']);
+    Route::post('/', [UserController::class, 'addNewUser'])->middleware(['auth:sanctum']);
+});
+
+// role
+Route::get('/roles', [RoleController::class, 'getRoleList'])->middleware(['auth:sanctum']);
+
+// class periods
+Route::prefix('class-periods')->group(function () {
+    Route::get('/', [ClassPeriodController::class, 'getClassPeriodList'])->middleware(['auth:sanctum']);
+    Route::post('/', [ClassPeriodController::class, 'addNewClassPeriod'])->middleware(['auth:sanctum']);
+
+    Route::get('/{classPeriodCode}', [ClassPeriodController::class, 'show'])->middleware(['auth:sanctum']);
+
+    // student enrollment
+    Route::get('/{classPeriodCode}/people', [StudentEnrollmentController::class, 'studentList'])->middleware(['auth:sanctum']);
+});
+
+// academic terms
+Route::get('/academic-terms', [AcademicTermController::class, 'getAcademicTermList'])->middleware(['auth:sanctum']);
+
+// grade classroom
+Route::get('/grade-classrooms', [GradeClassroomController::class, 'getGradeClassroomList'])->middleware(['auth:sanctum']);
 
 //student enrollment
-// Route::post('/studentenrollment/class', [App\Http\Controllers\Api\StudentEnrollmentController::class, 'studentList']);
+// Route::post('/studentenrollment/class', [StudentEnrollmentController::class, 'studentList']);
 // Route::post('/studentenrollment/studentclass', [App\Http\Controllers\Api\StudentEnrollmentController::class, 'studentClassroom']);
 
 //course

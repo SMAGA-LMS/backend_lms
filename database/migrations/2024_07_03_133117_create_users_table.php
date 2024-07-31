@@ -27,14 +27,15 @@ return new class extends Migration
                 role_id BIGINT UNSIGNED NOT NULL,
                 status_id BIGINT UNSIGNED NOT NULL,
 
+                user_code VARCHAR(16) NULL UNIQUE,
                 username VARCHAR(16) NOT NULL UNIQUE,
                 password VARCHAR(64) NOT NULL,
                 full_name VARCHAR(64) NOT NULL,
                 email VARCHAR(64) NULL UNIQUE,
                 avatar VARCHAR(64) NULL,
-                gender ENUM("male", "female"),
-                birth_date DATE,
-                created_at TIMESTAMP NOT NULL,
+                gender ENUM("MALE", "FEMALE") NOT NULL,
+                birth_date DATE NULL,
+                created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP NULL,
 
                 FOREIGN KEY (role_id) REFERENCES roles(id),

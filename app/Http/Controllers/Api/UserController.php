@@ -2,18 +2,32 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DataTransferObjects\Users\UserRequestDto;
+use App\Enums\UserGenderEnum;
+use App\Enums\UserRoleEnum;
+use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Models\User;
+use App\Http\Requests\AddNewUserRequest;
+use App\Http\Resources\AdminResource;
+use App\Http\Resources\StudentResource;
+use App\Http\Resources\TeacherResource;
 use App\Http\Resources\UserResource;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Request;
+use App\Services\UserService;
+use Brick\Math\BigInteger;
+use Illuminate\Support\Facades\Date;
 
-class UserController extends Controller
+class UserController
 {
+    protected $userService;
+    protected $apiResponse;
+
+    public function __construct(UserService $userService, ApiResponseHelper $apiResponse)
+    {
+        $this->userService = $userService;
+        $this->apiResponse = $apiResponse;
+    }
+
     //
     // public function index()
     // {
@@ -24,44 +38,63 @@ class UserController extends Controller
     //     return new UserResource(true, 'List Data User', $users);
     // }
 
-    // public function store(Request $request)
-    // {
-    //     //define validation rules
-    //     $validator = Validator::make($request->all(), [
-    //         'name'      => 'required',
-    //         'role'      => ['required', Rule::in(['Admin', 'Student', 'Teacher', 'Testing']),],
-    //         'avatar'     => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-    //         'password'     => 'required',
-    //     ]);
+    public function addNewUser(AddNewUserRequest $request)
+    {
+        $newUserDto = new UserRequestDto(
+            fullName: $request->validated('full_name'),
+            roleId: $request->validated('role_id'),
+            gender: $request->validated('gender'),
+            birthDate: $request->validated('birth_date')
+        );
 
-    //     //check if validation fails
-    //     if ($validator->fails()) {
-    //         return response()->json($validator->errors(), 422);
-    //     }
+        $result = $this->userService->addNewUser($newUserDto);
 
-    //     //upload image
-    //     if($request->hasFile('avatar')){
-    //         $image = $request->file('avatar');
-    //         $image->storeAs('public/UserProfilePicture', $image->hashName());
-    //         $imageDb = $image->hashName();
-    //     }
-    //     else{
-    //         $imageDb = "null";
-    //     }
+        // if (!$result->isSuccess) {
+
+        // }
+
+        return $this->apiResponse->successResponse(
+            message: $result->message,
+            data: new UserResource($result->data),
+            codeResponse: $result->codeResponse
+        );
 
 
-    //     //create user
-    //     $users = User::create([
-    //         'name'     => $request->name,
-    //         'role'   => $request->role,
-    //         'avatar'     => $imageDb,
-    //         'password' => Hash::make($request->password)
-    //     ]);
-    //     // $users = DB::insert('insert into users (name, role, avatar, password) values (?, ?, ?, ?)', [$request->name, $request->role, $image->hashName(), Hash::make($request->password)]);
+        // //define validation rules
+        // $validator = Validator::make($request->all(), [
+        //     'name'      => 'required',
+        //     'role'      => ['required', Rule::in(['Admin', 'Student', 'Teacher', 'Testing']),],
+        //     'avatar'     => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        //     'password'     => 'required',
+        // ]);
 
-    //     //return response
-    //     return new UserResource(true, 'New User added', $users);
-    // }
+        // //check if validation fails
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
+
+        // //upload image
+        // if ($request->hasFile('avatar')) {
+        //     $image = $request->file('avatar');
+        //     $image->storeAs('public/UserProfilePicture', $image->hashName());
+        //     $imageDb = $image->hashName();
+        // } else {
+        //     $imageDb = "null";
+        // }
+
+
+        // //create user
+        // $users = User::create([
+        //     'name'     => $request->name,
+        //     'role'   => $request->role,
+        //     'avatar'     => $imageDb,
+        //     'password' => Hash::make($request->password)
+        // ]);
+        // // $users = DB::insert('insert into users (name, role, avatar, password) values (?, ?, ?, ?)', [$request->name, $request->role, $image->hashName(), Hash::make($request->password)]);
+
+        // //return response
+        // return new UserResource(true, 'New User added', $users);
+    }
 
     // public function show($id)
     // {
@@ -78,73 +111,18 @@ class UserController extends Controller
 
     // }
 
-    public function login(Request $request)
+    public function getUserList(Request $request)
     {
+        $role_id = $request->query('role_id');
 
-        $validator = Validator::make($request->all(), [
-            'id'      => 'required',
-            'password'     => 'required',
-        ]);
+        if (!isset($role_id) || $role_id === '') $result = $this->userService->getAllUserList();
+        else $result = $this->userService->getSpecificUserList($role_id);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
-
-        //find post by ID
-        $id = $request->id;
-        $user = User::find($id);
-        $pw = $request->password;
-
-        // if(Auth::attempt(['id'=>$id, 'password'=>$request->password])){
-        //     return new UserResource(true, 'Detail User', $user);
-        // }
-
-        if ($user == NULL) {
-            return new UserResource(false, 'User not found', $id);
-        } else if (!Hash::check($pw, $user->password)) {
-            return new UserResource(false, 'Wrong password', $pw);
-        } else {
-            //return single post as a resource
-            return new UserResource(true, 'Logged in', $user);
-        }
+        $users = $result->data;
+        return $this->apiResponse->successResponse(
+            message: $result->message,
+            data: UserResource::collection($users),
+            codeResponse: $result->codeResponse
+        );
     }
-
-    // public function adminList()
-    // {
-    //     //get users
-    //     $users = DB::table('users')->where('role', 'Admin')->get();
-
-    //     //return collection of users as a resource
-    //     return new UserResource(true, 'List Data User', $users);
-    // }
-
-    // public function studentList()
-    // {
-    //     //get users
-    //     $users = DB::table('users')->where('role', 'Student')->get();
-
-    //     if($users == "[]"){
-    //         return new UserResource(false, 'No Students found', $users);
-    //     }
-    //     else{
-    //         //return collection of users as a resource
-    //         return new UserResource(true, 'List Data Student', $users);
-    //     }
-
-    // }
-
-    // public function teacherList()
-    // {
-    //     //get users
-    //     $users = DB::table('users')->where('role', 'Teacher')->get();
-
-    //     if($users == "[]"){
-    //         return new UserResource(false, 'No Teachers found', $users);
-    //     }
-    //     else{
-    //         //return collection of users as a resource
-    //         return new UserResource(true, 'List Data Teacher', $users);
-    //     }
-
-    // }
 }

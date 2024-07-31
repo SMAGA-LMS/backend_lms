@@ -15,29 +15,29 @@ class StatusSeeder extends Seeder
     {
         $statuses = [
             [
-                'status_type' => 'Active',
+                'name' => 'ACTIVE',
                 'created_at' => now(),
             ],
             [
-                'status_type' => 'Inactive',
+                'name' => 'INACTIVE',
                 'created_at' => now(),
             ],
             [
-                'status_type' => 'Graduated',
+                'name' => 'GRADUATED',
                 'created_at' => now(),
             ],
             [
-                'status_type' => 'Dropped',
+                'name' => 'DROPPED',
                 'created_at' => now(),
             ],
         ];
 
         foreach ($statuses as $status) {
             DB::insert(
-                'INSERT INTO statuses (status_type, created_at)
-                VALUES (:status_type, :created_at)',
+                'INSERT INTO statuses (name, created_at)
+                VALUES (:name, :created_at)',
                 [
-                    $status['status_type'],
+                    $status['name'],
                     $status['created_at'],
                 ]
             );

@@ -1,79 +1,97 @@
 <?php
 
-// namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers\Api;
 
-// use App\Http\Controllers\Controller;
-// use Illuminate\Http\Request;
-// use Illuminate\Support\Facades\Auth;
-// use Illuminate\Support\Facades\DB;
-// use App\Models\StudentEnrollment;
-// use App\Http\Resources\StudentEnrollmentResource;
-// use Illuminate\Support\Facades\Validator;
-// use Illuminate\Validation\Rule;
-// use Illuminate\Support\Facades\Hash;
+use App\Helpers\ApiResponseHelper;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use App\Models\StudentEnrollment;
+use App\Http\Resources\StudentEnrollmentResource;
+use App\Services\StudentEnrollmentService;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Hash;
 
-// class StudentEnrollmentController extends Controller
-// {
-//     public function index()
-//     {
-//         //get class
-//         $classes = StudentEnrollment::all();
+class StudentEnrollmentController extends Controller
+{
 
-//         //return collection of users as a resource
-//         return new StudentEnrollmentResource(true, 'List Data Student-Class', $classes);
-//     }
+    protected $studentEnrollmentService;
+    protected $apiResponse;
 
-//     public function store(Request $request)
-//     {
-//         //define validation rules
-//         $validator = Validator::make($request->all(), [
-//             'user_id'      => 'required',
-//             'classroom_id'     => 'required',
-//         ]);
+    public function __construct(StudentEnrollmentService $studentEnrollmentService, ApiResponseHelper $apiResponse)
+    {
+        $this->studentEnrollmentService = $studentEnrollmentService;
+        $this->apiResponse = $apiResponse;
+    }
 
-//         //check if validation fails
-//         if ($validator->fails()) {
-//             return response()->json($validator->errors(), 422);
-//         }
+    //     public function index()
+    //     {
+    //         //get class
+    //         $classes = StudentEnrollment::all();
 
-//         //create class
-//         $classes = StudentEnrollment::create([
-//             'user_id'     => $request->user_id,
-//             'classroom_id' => $request->classroom_id,
-//         ]);
+    //         //return collection of users as a resource
+    //         return new StudentEnrollmentResource(true, 'List Data Student-Class', $classes);
+    //     }
 
-//         //return response
-//         return new StudentEnrollmentResource(true, 'New Student-Class added', $classes);
-//     }
+    //     public function store(Request $request)
+    //     {
+    //         //define validation rules
+    //         $validator = Validator::make($request->all(), [
+    //             'user_id'      => 'required',
+    //             'classroom_id'     => 'required',
+    //         ]);
 
-//     public function studentList(Request $request)
-//     {
-//         //get users
-//         $users = DB::table('student_enrollments')->where('classroom_id', $request->classroom_id)->get();
+    //         //check if validation fails
+    //         if ($validator->fails()) {
+    //             return response()->json($validator->errors(), 422);
+    //         }
 
-//         if($users == "[]"){
-//             return new StudentEnrollmentResource(false, 'No Students found', $users);
-//         }
-//         else{
-//             //return collection of users as a resource
-//             return new StudentEnrollmentResource(true, 'List Student in Class', $users);
-//         }
+    //         //create class
+    //         $classes = StudentEnrollment::create([
+    //             'user_id'     => $request->user_id,
+    //             'classroom_id' => $request->classroom_id,
+    //         ]);
 
-//     }
+    //         //return response
+    //         return new StudentEnrollmentResource(true, 'New Student-Class added', $classes);
+    //     }
 
-//     public function studentClassroom(Request $request)
-//     {
-//         //get users
-//         // $users = DB::table('student_enrollments')->where('user_id', $request->user_id)->get();
-//         $users = StudentEnrollment::where('user_id', $request->user_id)->first();
+    public function studentList($classPeriodCode)
+    {
+        $result = $this->studentEnrollmentService->getAllEnrolledStudentClassPeriod($classPeriodCode);
 
-//         if($users == "[]"){
-//             return new StudentEnrollmentResource(false, 'No Students found', $users);
-//         }
-//         else{
-//             //return collection of users as a resource
-//             return new StudentEnrollmentResource(true, 'Students Class', $users->classroom_id);
-//         }
+        return $this->apiResponse->successResponse(
+            message: $result->message,
+            data: StudentEnrollmentResource::collection($result->data),
+            codeResponse: $result->codeResponse
+        );
 
-//     }
-// }
+        // //get users
+        // $users = DB::table('student_enrollments')->where('classroom_id', $request->classroom_id)->get();
+
+        // if ($users == "[]") {
+        //     return new StudentEnrollmentResource(false, 'No Students found', $users);
+        // } else {
+        //     //return collection of users as a resource
+        //     return new StudentEnrollmentResource(true, 'List Student in Class', $users);
+        // }
+    }
+
+    //     public function studentClassroom(Request $request)
+    //     {
+    //         //get users
+    //         // $users = DB::table('student_enrollments')->where('user_id', $request->user_id)->get();
+    //         $users = StudentEnrollment::where('user_id', $request->user_id)->first();
+
+    //         if($users == "[]"){
+    //             return new StudentEnrollmentResource(false, 'No Students found', $users);
+    //         }
+    //         else{
+    //             //return collection of users as a resource
+    //             return new StudentEnrollmentResource(true, 'Students Class', $users->classroom_id);
+    //         }
+
+    //     }
+}

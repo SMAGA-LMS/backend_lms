@@ -15,25 +15,25 @@ class RoleSeeder extends Seeder
     {
         $roles = [
             [
-                'role_name' => 'Admin',
+                'name' => 'ADMIN',
                 'created_at' => now()
             ],
             [
-                'role_name' => 'Student',
+                'name' => 'TEACHER',
                 'created_at' => now()
             ],
             [
-                'role_name' => 'Teacher',
+                'name' => 'STUDENT',
                 'created_at' => now()
             ]
         ];
 
         foreach ($roles as $role) {
             DB::insert(
-                'INSERT INTO roles (role_name, created_at)
-                VALUES (:role_name, :created_at)',
+                'INSERT INTO roles (name, created_at)
+                VALUES (:name, :created_at)',
                 [
-                    $role['role_name'],
+                    $role['name'],
                     $role['created_at'],
                 ]
             );

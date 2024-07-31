@@ -12,4 +12,12 @@ class Status extends Model
     protected $guarded = [
         'id'
     ];
+
+    /**
+     * Get the user associated with the status.
+     */
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
 }

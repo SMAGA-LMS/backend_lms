@@ -12,4 +12,12 @@ class Role extends Model
     protected $guarded = [
         'id'
     ];
+
+    /**
+     * Get the user associated with the role.
+     */
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
 }
