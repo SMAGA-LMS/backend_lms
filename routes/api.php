@@ -13,6 +13,7 @@ Route::apiResource('/classes', App\Http\Controllers\Api\ClassroomController::cla
 Route::apiResource('/studentenrollment', App\Http\Controllers\Api\StudentEnrollmentController::class);
 Route::apiResource('/courses', App\Http\Controllers\Api\CourseController::class);
 Route::apiResource('/classenrollment', App\Http\Controllers\Api\ClassEnrollmentController::class);
+Route::apiResource('/modules', App\Http\Controllers\Api\ModuleController::class);
 
 //user
 Route::post('/users/login', [App\Http\Controllers\Api\UserController::class, 'login']);
@@ -32,3 +33,6 @@ Route::post('/courses/grade', [App\Http\Controllers\Api\CourseController::class,
 Route::post('/classenrollment/class', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getCoursesClassID']);
 Route::post('/classenrollment/classlist', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getCoursesClassIDList']);
 Route::post('/classenrollment/course', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getClassesCourseID']);
+
+//module
+
