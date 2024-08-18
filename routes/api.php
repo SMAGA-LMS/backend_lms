@@ -14,6 +14,8 @@ Route::apiResource('/studentenrollment', App\Http\Controllers\Api\StudentEnrollm
 Route::apiResource('/courses', App\Http\Controllers\Api\CourseController::class);
 Route::apiResource('/classenrollment', App\Http\Controllers\Api\ClassEnrollmentController::class);
 Route::apiResource('/modules', App\Http\Controllers\Api\ModuleController::class);
+Route::apiResource('/readmodules', App\Http\Controllers\Api\ReadModuleController::class);
+Route::apiResource('/requirements', App\Http\Controllers\Api\RequirementController::class);
 
 //user
 Route::post('/users/login', [App\Http\Controllers\Api\UserController::class, 'login']);
