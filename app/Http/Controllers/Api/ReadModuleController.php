@@ -47,10 +47,35 @@ class ReadModuleController extends Controller
             ]);
             return new ReadModuleResource(true, 'New ReadModule added', $modules);
         }
-
-
-
-
-
     }
+
+    public function find(Request $request)
+    {
+        //define validation rules
+        $validator = Validator::make($request->all(), [
+            'user_id'      => 'required',
+            'module_id'      => 'required',
+        ]);
+
+        //check if validation fails
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $readmodule = DB::table('read_modules')->where('user_id', '=', $request->user_id)->where('module_id', '=', $request->module_id)->count();
+
+        $mod = [
+            'user_id' => $request->user_id,
+            'module_id' => $request->module_id,
+        ];
+
+        if($readmodule==0){
+            return new ReadModuleResource(false, 'ReadModule not found', $mod);
+        }
+        else{
+            return new ReadModuleResource(true, 'ReadModule found', $mod);
+        }
+    }
+
+
 }
