@@ -9,6 +9,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Resources\AuthenticationResource\LoginResource;
 use App\Http\Resources\TokenAuthResource;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -109,5 +110,65 @@ class AuthenticationController extends Controller
     private function generateToken(User $user, $deviceName)
     {
         return $user->createToken($deviceName)->plainTextToken;
+    }
+
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+        $result = $this->deleteCurrentToken($user);
+
+        // jika gagal, bisa karena kegagalan pada database, dsb (check di AuthenticationService)
+        if (!$result->isSuccess) {
+            return $this->apiResponse->errorResponse(
+                message: $result->message,
+                errors: $result->errors,
+                codeResponse: $result->codeResponse
+            );
+        }
+
+        return $this->apiResponse->successResponse(
+            message: $result->message,
+            data: $result->data,
+            codeResponse: $result->codeResponse
+        );
+    }
+
+    private function deleteCurrentToken($user): ResponseDto
+    {
+        $currentToken = $user->currentAccessToken();
+
+        if (!$currentToken) {
+            return new ResponseDto(
+                isSuccess: false,
+                message: "Logout failed.",
+                errors: [
+                    'Token not found.'
+                ],
+                data: null,
+                codeResponse: 401
+            );
+        }
+
+        try {
+            $currentToken->delete();
+        } catch (Exception $e) {
+            return new ResponseDto(
+                isSuccess: false,
+                message: "Failed to logout",
+                errors: [
+                    "Database fail to delete the token."
+                ],
+                data: null,
+                codeResponse: 500
+            );
+        }
+
+        return new ResponseDto(
+            isSuccess: true,
+            message: "Successfully Logout",
+            errors: [],
+            data: [],
+            codeResponse: 200
+        );
     }
 }
