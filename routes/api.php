@@ -21,7 +21,7 @@ Route::apiResource('/requirements', App\Http\Controllers\Api\RequirementControll
 //user
 // CHANGE: refactor menggunakan prefix (mirip di-grouping)
 // reason: biar ga perlu nulis /users/login, /users/..., cukup /login
-Route::prefix('users')->group(function () {
+Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthenticationController::class, 'login']);
     Route::post('/logout', [AuthenticationController::class, 'logout'])->middleware(['auth:sanctum']);
 });
