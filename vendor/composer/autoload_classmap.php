@@ -6,6 +6,9 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'App\\DataTransferObjects\\ResponseDto' => $baseDir . '/app/DataTransferObjects/ResponseDto.php',
+    'App\\Helpers\\ApiResponseHelper' => $baseDir . '/app/Helpers/ApiResponseHelper.php',
+    'App\\Http\\Controllers\\Api\\AuthenticationController' => $baseDir . '/app/Http/Controllers/Api/AuthenticationController.php',
     'App\\Http\\Controllers\\Api\\ClassEnrollmentController' => $baseDir . '/app/Http/Controllers/Api/ClassEnrollmentController.php',
     'App\\Http\\Controllers\\Api\\ClassroomController' => $baseDir . '/app/Http/Controllers/Api/ClassroomController.php',
     'App\\Http\\Controllers\\Api\\CourseController' => $baseDir . '/app/Http/Controllers/Api/CourseController.php',
@@ -14,10 +17,9 @@ return array(
     'App\\Http\\Controllers\\Api\\RequirementController' => $baseDir . '/app/Http/Controllers/Api/RequirementController.php',
     'App\\Http\\Controllers\\Api\\StudentEnrollmentController' => $baseDir . '/app/Http/Controllers/Api/StudentEnrollmentController.php',
     'App\\Http\\Controllers\\Api\\UserController' => $baseDir . '/app/Http/Controllers/Api/UserController.php',
-    'App\\Http\\Controllers\\ClassroomController' => $baseDir . '/app/Http/Controllers/ClassroomController.php',
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
-    'App\\Http\\Controllers\\StudentEnrollmentController' => $baseDir . '/app/Http/Controllers/StudentEnrollmentController.php',
-    'App\\Http\\Controllers\\UserController' => $baseDir . '/app/Http/Controllers/UserController.php',
+    'App\\Http\\Requests\\LoginRequest' => $baseDir . '/app/Http/Requests/LoginRequest.php',
+    'App\\Http\\Resources\\AuthenticationResource\\LoginResource' => $baseDir . '/app/Http/Resources/AuthenticationResource/LoginResource.php',
     'App\\Http\\Resources\\ClassEnrollmentResource' => $baseDir . '/app/Http/Resources/ClassEnrollmentResource.php',
     'App\\Http\\Resources\\ClassroomResource' => $baseDir . '/app/Http/Resources/ClassroomResource.php',
     'App\\Http\\Resources\\CourseResource' => $baseDir . '/app/Http/Resources/CourseResource.php',

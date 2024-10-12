@@ -513,6 +513,9 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
     );
 
     public static $classMap = array (
+        'App\\DataTransferObjects\\ResponseDto' => __DIR__ . '/../..' . '/app/DataTransferObjects/ResponseDto.php',
+        'App\\Helpers\\ApiResponseHelper' => __DIR__ . '/../..' . '/app/Helpers/ApiResponseHelper.php',
+        'App\\Http\\Controllers\\Api\\AuthenticationController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/AuthenticationController.php',
         'App\\Http\\Controllers\\Api\\ClassEnrollmentController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ClassEnrollmentController.php',
         'App\\Http\\Controllers\\Api\\ClassroomController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/ClassroomController.php',
         'App\\Http\\Controllers\\Api\\CourseController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/CourseController.php',
@@ -521,10 +524,9 @@ class ComposerStaticInit7e8c3c14ff33b199b4a0838993eb8423
         'App\\Http\\Controllers\\Api\\RequirementController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/RequirementController.php',
         'App\\Http\\Controllers\\Api\\StudentEnrollmentController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/StudentEnrollmentController.php',
         'App\\Http\\Controllers\\Api\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/Api/UserController.php',
-        'App\\Http\\Controllers\\ClassroomController' => __DIR__ . '/../..' . '/app/Http/Controllers/ClassroomController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
-        'App\\Http\\Controllers\\StudentEnrollmentController' => __DIR__ . '/../..' . '/app/Http/Controllers/StudentEnrollmentController.php',
-        'App\\Http\\Controllers\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/UserController.php',
+        'App\\Http\\Requests\\LoginRequest' => __DIR__ . '/../..' . '/app/Http/Requests/LoginRequest.php',
+        'App\\Http\\Resources\\AuthenticationResource\\LoginResource' => __DIR__ . '/../..' . '/app/Http/Resources/AuthenticationResource/LoginResource.php',
         'App\\Http\\Resources\\ClassEnrollmentResource' => __DIR__ . '/../..' . '/app/Http/Resources/ClassEnrollmentResource.php',
         'App\\Http\\Resources\\ClassroomResource' => __DIR__ . '/../..' . '/app/Http/Resources/ClassroomResource.php',
         'App\\Http\\Resources\\CourseResource' => __DIR__ . '/../..' . '/app/Http/Resources/CourseResource.php',
