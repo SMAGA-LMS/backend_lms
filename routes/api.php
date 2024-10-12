@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AuthenticationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -18,7 +19,14 @@ Route::apiResource('/readmodules', App\Http\Controllers\Api\ReadModuleController
 Route::apiResource('/requirements', App\Http\Controllers\Api\RequirementController::class);
 
 //user
-Route::post('/users/login', [App\Http\Controllers\Api\UserController::class, 'login']);
+// CHANGE: refactor menggunakan prefix (mirip di-grouping)
+// reason: biar ga perlu nulis /users/login, /users/..., cukup /login
+Route::prefix('users')->group(function () {
+    Route::post('/login', [AuthenticationController::class, 'login']);
+});
+
+// Route::post('/users/login', [App\Http\Controllers\Api\UserController::class, 'login']);
+
 Route::post('/users/admins', [App\Http\Controllers\Api\UserController::class, 'adminList']);
 Route::post('/users/students', [App\Http\Controllers\Api\UserController::class, 'studentList']);
 Route::post('/users/teachers', [App\Http\Controllers\Api\UserController::class, 'teacherList']);
