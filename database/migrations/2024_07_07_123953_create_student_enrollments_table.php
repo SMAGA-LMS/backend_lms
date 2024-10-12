@@ -4,6 +4,8 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+// CHANGE: ubah nama file dari 2024_07_07_123453_create_student_enrollments_table.php menjadi 2024_07_07_123953_create_student_enrollments_table.php
+// reason: ketika php artisan migrate, student_enrollments ini error karena butuh table classroom, jadi urutannya mesti setelah classroom table/migration
 return new class extends Migration
 {
     /**
