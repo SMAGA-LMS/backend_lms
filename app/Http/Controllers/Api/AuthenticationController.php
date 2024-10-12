@@ -188,8 +188,6 @@ class AuthenticationController extends Controller
             );
         }
 
-        // kalau pakai eloquent laravel (ORM), tolong pakai eager loading di resource nya (kalau misal ada relasi table pakai with)
-        // kalau ga pakai eager loading ntar tetep kena return walau meski ga pakai with pada saat ambil dari database di service
         return $this->apiResponse->successResponse(
             message: "Success get current user",
             data: new AuthMeResource($user),
