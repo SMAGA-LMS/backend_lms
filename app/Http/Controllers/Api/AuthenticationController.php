@@ -6,6 +6,7 @@ use App\DataTransferObjects\ResponseDto;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Resources\AuthenticationResource\LoginResource;
 use App\Http\Resources\TokenAuthResource;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -53,7 +54,7 @@ class AuthenticationController extends Controller
 
         return $this->apiResponse->successResponse(
             message: $result->message,
-            data: new TokenAuthResource($token),
+            data: new LoginResource($user, $token),
             codeResponse: $result->codeResponse
         );
 
