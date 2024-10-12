@@ -47,7 +47,7 @@ class LoginRequest extends FormRequest
     protected function failedValidation(Validator $validator)
     {
         $response = $this->apiResponse->errorResponse(
-            message: "Validation error",
+            message: "Validation error.",
             errors: $validator->errors()->toArray(),
             codeResponse: 422
         );
@@ -58,8 +58,10 @@ class LoginRequest extends FormRequest
     protected function failedAuthorization()
     {
         $response = $this->apiResponse->errorResponse(
-            message: "Authorization failed. User are already logged in.",
-            errors: [],
+            message: "Authorization failed.",
+            errors: [
+                "User are already logged in."
+            ],
             codeResponse: 401
         );
 
