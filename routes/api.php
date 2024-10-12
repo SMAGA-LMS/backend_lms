@@ -24,6 +24,7 @@ Route::apiResource('/requirements', App\Http\Controllers\Api\RequirementControll
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthenticationController::class, 'login']);
     Route::post('/logout', [AuthenticationController::class, 'logout'])->middleware(['auth:sanctum']);
+    Route::get('/me', [AuthenticationController::class, 'authMe'])->middleware(['auth:sanctum']);
 });
 
 // Route::post('/users/login', [App\Http\Controllers\Api\UserController::class, 'login']);

@@ -6,8 +6,10 @@ use App\DataTransferObjects\ResponseDto;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
+use App\Http\Resources\AuthenticationResource\AuthMeResource;
 use App\Http\Resources\AuthenticationResource\LoginResource;
 use App\Http\Resources\TokenAuthResource;
+use App\Http\Resources\UserResource;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -168,6 +170,29 @@ class AuthenticationController extends Controller
             message: "Successfully Logout",
             errors: [],
             data: [],
+            codeResponse: 200
+        );
+    }
+
+    public function authMe(Request $request)
+    {
+        try {
+            $user = $request->user();
+        } catch (Exception $e) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to get current user.",
+                errors: [
+                    $e->getMessage()
+                ],
+                codeResponse: 404
+            );
+        }
+
+        // kalau pakai eloquent laravel (ORM), tolong pakai eager loading di resource nya (kalau misal ada relasi table pakai with)
+        // kalau ga pakai eager loading ntar tetep kena return walau meski ga pakai with pada saat ambil dari database di service
+        return $this->apiResponse->successResponse(
+            message: "Success get current user",
+            data: new AuthMeResource($user),
             codeResponse: 200
         );
     }
