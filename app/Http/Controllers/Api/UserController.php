@@ -2,26 +2,94 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DataTransferObjects\ResponseDto;
+use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\UserResource\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
-use App\Http\Resources\UserResource;
+// use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    //
-    public function index()
+    protected $apiResponse;
+
+    public function __construct(ApiResponseHelper $apiResponse)
     {
-        //get users
+        $this->apiResponse = $apiResponse;
+    }
+
+    // pakai query param /users?role=RoleName
+    public function index(Request $request)
+    {
+        $role = $request->query('role');
+        if (!isset($role) || $role === '') $result = $this->getAllUserList();
+        else $result = $this->getSpecificUserList($role);
+
+        $users = $result->data;
+        return $this->apiResponse->successResponse(
+            message: $result->message,
+            data: UserResource::collection($users),
+            codeResponse: $result->codeResponse
+        );
+
+        // CHANGE: pindah ke method getAllUserList()
+        // //get users
+        // $users = User::all();
+
+        // //return collection of users as a resource
+        // return new UserResource(true, 'List Data User', $users);
+    }
+
+    public function getAllUserList(): ResponseDto
+    {
+
         $users = User::all();
 
-        //return collection of users as a resource
-        return new UserResource(true, 'List Data User', $users);
+        $message = "List of users retrieved successfully.";
+        if (empty($users)) $message = "No users found.";
+
+        return new ResponseDto(
+            isSuccess: true,
+            message: $message,
+            data: $users,
+            codeResponse: 200
+        );
+    }
+
+    public function getSpecificUserList(string $role): ResponseDto
+    {
+        if (empty($role)) {
+            return new ResponseDto(
+                isSuccess: true,
+                message: "No users found.",
+                data: [],
+                codeResponse: 200
+            );
+        }
+
+        $users = DB::table('users')->where('role', $role)->get();
+
+        if ($users->isEmpty()) {
+            return new ResponseDto(
+                isSuccess: true,
+                message: "No " . $role . " found.",
+                data: [],
+                codeResponse: 200
+            );
+        }
+
+        return new ResponseDto(
+            isSuccess: true,
+            message: "List of " . $users->first()->role . " retrieved successfully.",
+            data: $users,
+            codeResponse: 200
+        );
     }
 
     public function store(Request $request)
@@ -40,12 +108,11 @@ class UserController extends Controller
         }
 
         //upload image
-        if($request->hasFile('avatar')){
+        if ($request->hasFile('avatar')) {
             $image = $request->file('avatar');
             $image->storeAs('public/UserProfilePicture', $image->hashName());
             $imageDb = $image->hashName();
-        }
-        else{
+        } else {
             $imageDb = "null";
         }
 
@@ -69,16 +136,15 @@ class UserController extends Controller
         $user = User::find($id);
 
         //return single post as a resource
-        if($user==null){
+        if ($user == null) {
             return new UserResource(false, 'User not found', $user);
-        }
-        else{
+        } else {
             return new UserResource(true, 'Detail User', $user);
         }
-
     }
 
-    public function login(Request $request){
+    public function login(Request $request)
+    {
 
         $validator = Validator::make($request->all(), [
             'id'      => 'required',
@@ -98,55 +164,53 @@ class UserController extends Controller
         //     return new UserResource(true, 'Detail User', $user);
         // }
 
-        if($user == NULL){
+        if ($user == NULL) {
             return new UserResource(false, 'User not found', $id);
-        }
-        else if(!Hash::check($pw, $user->password)){
+        } else if (!Hash::check($pw, $user->password)) {
             return new UserResource(false, 'Wrong password', $pw);
-        }
-        else{
+        } else {
             //return single post as a resource
             return new UserResource(true, 'Logged in', $user);
         }
-
     }
 
-    public function adminList()
-    {
-        //get users
-        $users = DB::table('users')->where('role', 'Admin')->get();
+    // jadi pake yang method index aja, pembedanya dari query param
+    // public function adminList()
+    // {
+    //     //get users
+    //     $users = DB::table('users')->where('role', 'Admin')->get();
 
-        //return collection of users as a resource
-        return new UserResource(true, 'List Data User', $users);
-    }
+    //     //return collection of users as a resource
+    //     return new UserResource(true, 'List Data User', $users);
+    // }
 
-    public function studentList()
-    {
-        //get users
-        $users = DB::table('users')->where('role', 'Student')->get();
+    // public function studentList()
+    // {
+    //     //get users
+    //     $users = DB::table('users')->where('role', 'Student')->get();
 
-        if($users == "[]"){
-            return new UserResource(false, 'No Students found', $users);
-        }
-        else{
-            //return collection of users as a resource
-            return new UserResource(true, 'List Data Student', $users);
-        }
+    //     if($users == "[]"){
+    //         return new UserResource(false, 'No Students found', $users);
+    //     }
+    //     else{
+    //         //return collection of users as a resource
+    //         return new UserResource(true, 'List Data Student', $users);
+    //     }
 
-    }
+    // }
 
-    public function teacherList()
-    {
-        //get users
-        $users = DB::table('users')->where('role', 'Teacher')->get();
+    // public function teacherList()
+    // {
+    //     //get users
+    //     $users = DB::table('users')->where('role', 'Teacher')->get();
 
-        if($users == "[]"){
-            return new UserResource(false, 'No Teachers found', $users);
-        }
-        else{
-            //return collection of users as a resource
-            return new UserResource(true, 'List Data Teacher', $users);
-        }
+    //     if($users == "[]"){
+    //         return new UserResource(false, 'No Teachers found', $users);
+    //     }
+    //     else{
+    //         //return collection of users as a resource
+    //         return new UserResource(true, 'List Data Teacher', $users);
+    //     }
 
-    }
+    // }
 }

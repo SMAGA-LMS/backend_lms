@@ -1,22 +1,25 @@
 <?php
 
 use App\Http\Controllers\Api\AuthenticationController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// })->middleware('auth:sanctum');
 
 //default api
-Route::apiResource('/users', App\Http\Controllers\Api\UserController::class);
-Route::apiResource('/classes', App\Http\Controllers\Api\ClassroomController::class);
-Route::apiResource('/studentenrollment', App\Http\Controllers\Api\StudentEnrollmentController::class);
-Route::apiResource('/courses', App\Http\Controllers\Api\CourseController::class);
-Route::apiResource('/classenrollment', App\Http\Controllers\Api\ClassEnrollmentController::class);
-Route::apiResource('/modules', App\Http\Controllers\Api\ModuleController::class);
-Route::apiResource('/readmodules', App\Http\Controllers\Api\ReadModuleController::class);
-Route::apiResource('/requirements', App\Http\Controllers\Api\RequirementController::class);
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::apiResource('/users', UserController::class);
+});
+// Route::apiResource('/classes', App\Http\Controllers\Api\ClassroomController::class);
+// Route::apiResource('/studentenrollment', App\Http\Controllers\Api\StudentEnrollmentController::class);
+// Route::apiResource('/courses', App\Http\Controllers\Api\CourseController::class);
+// Route::apiResource('/classenrollment', App\Http\Controllers\Api\ClassEnrollmentController::class);
+// Route::apiResource('/modules', App\Http\Controllers\Api\ModuleController::class);
+// Route::apiResource('/readmodules', App\Http\Controllers\Api\ReadModuleController::class);
+// Route::apiResource('/requirements', App\Http\Controllers\Api\RequirementController::class);
 
 //user
 // CHANGE: refactor menggunakan prefix (mirip di-grouping)
@@ -29,9 +32,15 @@ Route::prefix('auth')->group(function () {
 
 // Route::post('/users/login', [App\Http\Controllers\Api\UserController::class, 'login']);
 
-Route::post('/users/admins', [App\Http\Controllers\Api\UserController::class, 'adminList']);
-Route::post('/users/students', [App\Http\Controllers\Api\UserController::class, 'studentList']);
-Route::post('/users/teachers', [App\Http\Controllers\Api\UserController::class, 'teacherList']);
+// CHANGE: ubah jadi menggunakan query param (/users?role=RoleName)
+// jangan dipaksain pakai POST juga
+// karena udah pakai template apiResource, jadi kerjain nya di UserController method show aja
+
+// Route::post('/users/admins', [App\Http\Controllers\Api\UserController::class, 'adminList']);
+// Route::post('/users/students', [App\Http\Controllers\Api\UserController::class, 'studentList']);
+// Route::post('/users/teachers', [App\Http\Controllers\Api\UserController::class, 'teacherList']);
+
+
 
 //student enrollment
 Route::post('/studentenrollment/class', [App\Http\Controllers\Api\StudentEnrollmentController::class, 'studentList']);
