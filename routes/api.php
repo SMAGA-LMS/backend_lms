@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthenticationController;
+use App\Http\Controllers\Api\ClassroomController;
+use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -12,7 +14,14 @@ use Illuminate\Support\Facades\Route;
 //default api
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/users', UserController::class);
+    // CHANGE: better penamaan end point samain, di sini penamaannya classroom,
+    // jadi end point nya classrooms aja
+    Route::apiResource('/classrooms', ClassroomController::class);
+    Route::apiResource('/courses', CourseController::class);
 });
+
+// dipindahin ke atas, pake middleware auth:sanctum
+// Route::apiResource('/users', App\Http\Controllers\Api\UserController::class);
 // Route::apiResource('/classes', App\Http\Controllers\Api\ClassroomController::class);
 // Route::apiResource('/studentenrollment', App\Http\Controllers\Api\StudentEnrollmentController::class);
 // Route::apiResource('/courses', App\Http\Controllers\Api\CourseController::class);
