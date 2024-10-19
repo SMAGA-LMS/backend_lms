@@ -16,4 +16,12 @@ class Course extends Model
         'user_id',
         'grade',
     ];
+
+    /**
+     * Get the status associated with the user.
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

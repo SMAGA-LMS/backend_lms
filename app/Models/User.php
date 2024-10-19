@@ -49,4 +49,12 @@ class User extends Authenticatable
     //             'password' => 'hashed',
     //         ];
     //     }
+
+    /**
+     * Get the course associated with the status.
+     */
+    public function courses()
+    {
+        return $this->hasMany(Course::class);
+    }
 }
