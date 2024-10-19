@@ -118,7 +118,7 @@ class UserController extends Controller
             $image->storeAs('public/UserProfilePicture', $image->hashName());
             $imageDb = $image->hashName();
         } else {
-            $imageDb = "null";
+            $imageDb = null;
         }
 
         // new username no space and max 16 characters
