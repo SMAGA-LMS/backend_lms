@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\DataTransferObjects\ResponseDto;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\UserRequest\AddNewUserRequest;
 use App\Http\Resources\UserResource\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -92,20 +93,24 @@ class UserController extends Controller
         );
     }
 
-    public function store(Request $request)
+    public function store(AddNewUserRequest $request)
     {
-        //define validation rules
-        $validator = Validator::make($request->all(), [
-            'name'      => 'required',
-            'role'      => ['required', Rule::in(['Admin', 'Student', 'Teacher', 'Testing']),],
-            'avatar'     => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'password'     => 'required',
-        ]);
+        // CHANGE: pindah ke AddNewUserRequest
+        // //define validation rules
+        // $validator = Validator::make($request->all(), [
+        //     'name'      => 'required',
+        //     'role'      => ['required', Rule::in(['Admin', 'Student', 'Teacher', 'Testing']),],
+        //     'avatar'     => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        //     'password'     => 'required',
+        // ]);
 
-        //check if validation fails
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
+        // //check if validation fails
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
+
+        $validatedNewUser = $request->validated();
+
 
         //upload image
         if ($request->hasFile('avatar')) {
@@ -116,18 +121,27 @@ class UserController extends Controller
             $imageDb = "null";
         }
 
+        // new username no space and max 16 characters
+        $newUsername = substr(str_replace(' ', '', $validatedNewUser['name']), 0, 16);
 
         //create user
         $users = User::create([
-            'name'     => $request->name,
-            'role'   => $request->role,
-            'avatar'     => $imageDb,
-            'password' => Hash::make($request->password)
+            'name'     => $validatedNewUser['name'],
+            'username' => $newUsername,
+            'role'     => $validatedNewUser['role'],
+            'avatar'   => $imageDb,
+            'password' => Hash::make($validatedNewUser['password']),
         ]);
+
         // $users = DB::insert('insert into users (name, role, avatar, password) values (?, ?, ?, ?)', [$request->name, $request->role, $image->hashName(), Hash::make($request->password)]);
 
         //return response
-        return new UserResource(true, 'New User added', $users);
+        // return new UserResource(true, 'New User added', $users);
+        return $this->apiResponse->successResponse(
+            message: "New user added.",
+            data: new UserResource($users),
+            codeResponse: 201
+        );
     }
 
     public function show($id)
