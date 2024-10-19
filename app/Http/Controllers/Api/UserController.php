@@ -121,8 +121,10 @@ class UserController extends Controller
             $imageDb = null;
         }
 
-        // new username no space and max 16 characters
-        $newUsername = strtolower(substr(str_replace(' ', '', $validatedNewUser['name']), 0, 16));
+        // new base username no space and max 16 characters
+        $baseUsername = strtolower(substr(str_replace(' ', '', $validatedNewUser['name']), 0, 16));
+        // Generate a unique username
+        $newUsername = $this->generateUniqueUsername($baseUsername);
 
         //create user
         $users = User::create([
@@ -142,6 +144,19 @@ class UserController extends Controller
             data: new UserResource($users),
             codeResponse: 201
         );
+    }
+
+    private function generateUniqueUsername($baseUsername)
+    {
+        $username = $baseUsername;
+        $counter = 1;
+
+        while (User::where('username', $username)->exists()) {
+            $username = $baseUsername . $counter;
+            $counter++;
+        }
+
+        return $username;
     }
 
     public function show($id)

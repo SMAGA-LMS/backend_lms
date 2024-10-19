@@ -27,7 +27,7 @@ class AddNewUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'      => 'required|string|min:6|max:64',
+            'name'      => 'required|string|min:5|max:64',
             'role'      => ['required', Rule::in([UserRoleEnum::ADMIN, UserRoleEnum::STUDENT, UserRoleEnum::TEACHER, 'TESTING'])],
             'avatar'     => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'password'     => 'required',
