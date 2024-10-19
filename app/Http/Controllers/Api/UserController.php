@@ -122,7 +122,7 @@ class UserController extends Controller
         }
 
         // new username no space and max 16 characters
-        $newUsername = substr(str_replace(' ', '', $validatedNewUser['name']), 0, 16);
+        $newUsername = strtolower(substr(str_replace(' ', '', $validatedNewUser['name']), 0, 16));
 
         //create user
         $users = User::create([
