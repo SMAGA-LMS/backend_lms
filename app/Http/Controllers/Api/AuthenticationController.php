@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\DataTransferObjects\ResponseDto;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\LoginRequest;
+use App\Http\Requests\AuthenticationRequest\LoginRequest;
 use App\Http\Resources\AuthenticationResource\AuthMeResource;
 use App\Http\Resources\AuthenticationResource\LoginResource;
 use App\Http\Resources\TokenAuthResource;
