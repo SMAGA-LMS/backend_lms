@@ -45,15 +45,40 @@ class CourseController extends Controller
 
     public function show($id)
     {
-        //find post by ID
-        $course = Course::find($id);
-
-        //return single post as a resource
-        if ($course == null) {
-            return new CourseResource(false, 'Course not found', $course);
-        } else {
-            return new CourseResource(true, 'Detail Course', $course);
+        if (!is_numeric($id)) {
+            return $this->apiResponse->errorResponse(
+                message: "Invalid Course ID",
+                errors: ['Invalid Course ID'],
+                codeResponse: 400
+            );
         }
+
+        //find post by ID
+        $course = Course::with('user')->find($id);
+
+        $message = "Course data retrieved successfully.";
+        if (empty($course)) $message = "Course not found.";
+
+        if ($course == null) {
+            return $this->apiResponse->errorResponse(
+                message: $message,
+                errors: ['Course not found'],
+                codeResponse: 404
+            );
+        }
+
+        return $this->apiResponse->successResponse(
+            message: $message,
+            data: new CourseResource($course),
+            codeResponse: 200
+        );
+
+        // //return single post as a resource
+        // if ($course == null) {
+        //     return new CourseResource(false, 'Course not found', $course);
+        // } else {
+        //     return new CourseResource(true, 'Detail Course', $course);
+        // }
     }
 
     public function courseTeacherList(Request $request)

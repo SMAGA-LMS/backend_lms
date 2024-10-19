@@ -11,6 +11,18 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
+/*
+    behind this route apiResource laravel
+    Route::apiResource('/courses', CourseController::class);
+
+    it will create these end point
+    GET /courses → CourseController@index
+    GET /courses/{course} → CourseController@show
+    POST /courses → CourseController@store
+    PUT/PATCH /courses/{course} → CourseController@update
+    DELETE /courses/{course} → CourseController@destroy
+*/
+
 //default api
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/users', UserController::class);
