@@ -10,7 +10,7 @@ class ResponseDto
     public readonly mixed $data;
     public readonly int $codeResponse;
 
-    public function __construct(bool $isSuccess, string $message, $errors, $data, $codeResponse)
+    public function __construct(bool $isSuccess, string $message, $data, $codeResponse, $errors = [])
     {
         $this->isSuccess = $isSuccess;
         $this->message = $message;

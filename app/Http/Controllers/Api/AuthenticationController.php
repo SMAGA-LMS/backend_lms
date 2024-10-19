@@ -103,7 +103,6 @@ class AuthenticationController extends Controller
         return new ResponseDto(
             isSuccess: true,
             message: 'Success Login',
-            errors: [],
             data: $user,
             codeResponse: 200
         );
@@ -168,7 +167,6 @@ class AuthenticationController extends Controller
         return new ResponseDto(
             isSuccess: true,
             message: "Successfully Logout",
-            errors: [],
             data: [],
             codeResponse: 200
         );
