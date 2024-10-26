@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ClassroomRequest\AddNewClassroomRequest;
 use App\Http\Resources\ClassroomResource\ClassroomResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,6 +14,7 @@ use App\Models\Classroom;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use PhpParser\Node\Stmt\TryCatch;
 
 class ClassroomController extends Controller
 {
@@ -57,26 +59,42 @@ class ClassroomController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(AddNewClassroomRequest $request)
     {
+        // CHANGE: pindah ke ClassroomRequest\AddNewClassroomRequest
         //define validation rules
-        $validator = Validator::make($request->all(), [
-            'name'      => 'required',
-            'grade'     => 'required',
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'name'      => 'required',
+        //     'grade'     => 'required',
+        // ]);
 
         //check if validation fails
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
+
+        $validatedNewClassroom = $request->validated();
+
+        //create classroom
+        try {
+            $classroom = Classroom::create([
+                'name'     => $validatedNewClassroom['name'],
+                'grade' => $validatedNewClassroom['grade'],
+            ]);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to create new classroom.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
         }
 
-        //create class
-        $classes = Classroom::create([
-            'name'     => $request->name,
-            'grade' => $request->grade,
-        ]);
-
         //return response
-        return new ClassroomResource(true, 'New Class added', $classes);
+        // return new ClassroomResource(true, 'New Class added', $classes);
+        return $this->apiResponse->successResponse(
+            message: "New classroom added.",
+            data: new ClassroomResource($classroom),
+            codeResponse: 201
+        );
     }
 }
