@@ -31,7 +31,15 @@ class ClassroomController extends Controller
         //get class
         // CHANGE: ganti nama variable $classes jadi $classrooms
         // samain kayak model, dan table database
-        $classrooms = Classroom::all();
+        try {
+            $classrooms = Classroom::all();
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve list of classrooms.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
+        }
 
         $message = "List of classroom retrieved successfully.";
         if (empty($classrooms)) $message = "No classrooms found.";
@@ -78,7 +86,7 @@ class ClassroomController extends Controller
         //create classroom
         try {
             $classroom = Classroom::create([
-                'name'     => $validatedNewClassroom['name'],
+                'name'     => $validatedNewClassroom->name,
                 'grade' => $validatedNewClassroom['grade'],
             ]);
         } catch (\Throwable $th) {
