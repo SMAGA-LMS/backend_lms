@@ -29,7 +29,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // CHANGE: better penamaan end point samain, di sini penamaannya classroom,
     // jadi end point nya classrooms aja
     Route::apiResource('/classrooms', ClassroomController::class);
-    Route::apiResource('/courses', CourseController::class);
+
+    Route::apiResource('courses', CourseController::class);
+    Route::put('courses/{course}/teachers', [CourseController::class, 'assignTeacher']);
 });
 
 // dipindahin ke atas, pake middleware auth:sanctum
@@ -64,19 +66,19 @@ Route::prefix('auth')->group(function () {
 
 
 //student enrollment
-Route::post('/studentenrollment/class', [App\Http\Controllers\Api\StudentEnrollmentController::class, 'studentList']);
-Route::post('/studentenrollment/studentclass', [App\Http\Controllers\Api\StudentEnrollmentController::class, 'studentClassroom']);
+// Route::post('/studentenrollment/class', [App\Http\Controllers\Api\StudentEnrollmentController::class, 'studentList']);
+// Route::post('/studentenrollment/studentclass', [App\Http\Controllers\Api\StudentEnrollmentController::class, 'studentClassroom']);
 
 //course
-Route::post('/courses/teacher', [App\Http\Controllers\Api\CourseController::class, 'courseTeacherList']);
-Route::post('/courses/grade', [App\Http\Controllers\Api\CourseController::class, 'courseGradeList']);
+// Route::post('/courses/teacher', [App\Http\Controllers\Api\CourseController::class, 'courseTeacherList']);
+// Route::post('/courses/grade', [App\Http\Controllers\Api\CourseController::class, 'courseGradeList']);
 
 //class enrollment
-Route::post('/classenrollment/class', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getCoursesClassID']);
-Route::post('/classenrollment/classlist', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getCoursesClassIDList']);
-Route::post('/classenrollment/course', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getClassesCourseID']);
+// Route::post('/classenrollment/class', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getCoursesClassID']);
+// Route::post('/classenrollment/classlist', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getCoursesClassIDList']);
+// Route::post('/classenrollment/course', [App\Http\Controllers\Api\ClassEnrollmentController::class, 'getClassesCourseID']);
 
 //module
 
 //readmodule
-Route::post('/readmodules/find', [App\Http\Controllers\Api\ReadModuleController::class, 'find']);
+// Route::post('/readmodules/find', [App\Http\Controllers\Api\ReadModuleController::class, 'find']);
