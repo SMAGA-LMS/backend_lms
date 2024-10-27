@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum UserRoleEnum: int
+enum UserRoleEnum
 {
     const ADMIN = "ADMIN";
     const TEACHER = "TEACHER";
