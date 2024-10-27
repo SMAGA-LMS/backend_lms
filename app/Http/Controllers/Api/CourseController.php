@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseRequest\AddNewCourseRequest;
+use App\Http\Requests\CourseRequest\AssignTeacherRequest;
 use App\Http\Resources\ClassroomResource\ClassroomResource;
 use App\Http\Resources\CourseResource\CourseResource;
 use Illuminate\Http\Request;
@@ -174,6 +175,8 @@ class CourseController extends Controller
         );
     }
 
+    // TODO: better dipisah business logic untuk update course dengan assign teacher
+    // logic yang kevin buat untuk assign teacher udah coba dipisahin di assignTeacher
     public function update(Request $request, $id)
     {
         //define validation rules
@@ -193,5 +196,45 @@ class CourseController extends Controller
 
         //return response
         return new CourseResource(true, 'New Teacher added', $course);
+    }
+
+    public function assignTeacher(AssignTeacherRequest $request, $id)
+    {
+        $validatedTeacher = $request->validated();
+
+        try {
+            $course = Course::find($id);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Course not found.",
+                errors: $th->getMessage(),
+                codeResponse: 404
+            );
+        }
+
+        $userID = $validatedTeacher['userID'] ?? null;
+        if ($userID != null) {
+            $userID = (int)$userID;
+        }
+
+        try {
+            $course->update([
+                'user_id' => $userID,
+            ]);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to assign new teacher.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+        //return response
+        // return new CourseResource(true, 'New Teacher added', $course);
+        return $this->apiResponse->successResponse(
+            message: "New teacher assigned.",
+            data: new CourseResource($course),
+            codeResponse: 200
+        );
     }
 }
