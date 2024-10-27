@@ -19,7 +19,9 @@ class CourseResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'grade' => $this->grade,
-            'user' => new UserResource($this->whenLoaded('user')),
+            'user' => $this->user ? new UserResource($this->user) : null,
+            // kalau pakai eloquent kayak di bawah ini
+            // 'user' => new UserResource($this->whenLoaded('user')),
         ];
 
         return $dataResponse;

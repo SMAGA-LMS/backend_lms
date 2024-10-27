@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CourseRequest\AddNewCourseRequest;
 use App\Http\Resources\ClassroomResource\ClassroomResource;
 use App\Http\Resources\CourseResource\CourseResource;
 use Illuminate\Http\Request;
@@ -125,35 +126,52 @@ class CourseController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(AddNewCourseRequest $request)
     {
+        // pindah ke AddNewCourseRequest\AddNewCourseRequest untuk validasi
         //define validation rules
-        $validator = Validator::make($request->all(), [
-            'name'     => 'required',
-            'user_id' => 'string',
-            'grade' => 'required',
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'name'     => 'required',
+        //     'user_id' => 'string',
+        //     'grade' => 'required',
+        // ]);
 
         //check if validation fails
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
+
+        $validatedNewCourse = $request->validated();
+
+        $teacher = $validatedNewCourse['userID'] ?? null;
+
+        // hindari value null tapi dijadiin string, lebih baik tipe data NULL aja
+        // if ($teacher == null) {
+        //     $teacher == "null";
+        // }
+
+        //create course
+        try {
+            $course = Course::create([
+                'user_id'     => $teacher,
+                'name' => $validatedNewCourse['name'],
+                'grade' => $validatedNewCourse['grade'],
+            ]);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to create new course.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
         }
-
-        $teacher = $request->user_id;
-
-        if ($teacher == null) {
-            $teacher == "null";
-        }
-
-        //create class
-        $course = Course::create([
-            'user_id'     => $request->user_id,
-            'name' => $request->name,
-            'grade' => $request->grade,
-        ]);
 
         //return response
-        return new CourseResource(true, 'New Student-Class added', $course);
+        // return new CourseResource(true, 'New Student-Class added', $course);
+        return $this->apiResponse->successResponse(
+            message: "New course added.",
+            data: new CourseResource($course),
+            codeResponse: 201
+        );
     }
 
     public function update(Request $request, $id)
