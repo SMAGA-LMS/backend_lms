@@ -86,7 +86,7 @@ class ClassroomController extends Controller
         //create classroom
         try {
             $classroom = Classroom::create([
-                'name'     => $validatedNewClassroom->name,
+                'name'     => $validatedNewClassroom['name'],
                 'grade' => $validatedNewClassroom['grade'],
             ]);
         } catch (\Throwable $th) {
