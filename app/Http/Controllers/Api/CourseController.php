@@ -232,7 +232,7 @@ class CourseController extends Controller
         //return response
         // return new CourseResource(true, 'New Teacher added', $course);
         return $this->apiResponse->successResponse(
-            message: "New teacher assigned.",
+            message: "Teacher updated.",
             data: new CourseResource($course),
             codeResponse: 200
         );
