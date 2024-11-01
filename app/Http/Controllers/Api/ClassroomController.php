@@ -56,15 +56,45 @@ class ClassroomController extends Controller
 
     public function show($id)
     {
-        //find class by ID
-        $class = Classroom::find($id);
-
-        //return single post as a resource
-        if ($class == null) {
-            return new ClassroomResource(false, 'User not found', $class);
-        } else {
-            return new ClassroomResource(true, 'Detail User', $class);
+        if (!is_numeric($id)) {
+            return $this->apiResponse->errorResponse(
+                message: "Invalid Classroom ID",
+                errors: ['Invalid Classroom ID'],
+                codeResponse: 400
+            );
         }
+
+        //find classroom by ID
+        try {
+            $classroom = Classroom::find($id);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve classroom.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+
+        // //return single post as a resource
+        // if ($class == null) {
+        //     return new ClassroomResource(false, 'User not found', $class);
+        // } else {
+        //     return new ClassroomResource(true, 'Detail User', $class);
+        // }
+        if ($classroom == null) {
+            return $this->apiResponse->errorResponse(
+                message: "Classroom not found.",
+                errors: ['Classroom not found'],
+                codeResponse: 404
+            );
+        }
+
+        return $this->apiResponse->successResponse(
+            message: "Classroom data retrieved successfully.",
+            data: new ClassroomResource($classroom),
+            codeResponse: 200
+        );
     }
 
     public function store(AddNewClassroomRequest $request)
