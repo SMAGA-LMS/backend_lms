@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Api;
 use App\DataTransferObjects\ResponseDto;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StudentEnrollmentRequest\GetAvailableStudentsByClassroomRequest;
 use App\Http\Resources\StudentEnrollmentResource\ListStudentEnrolledClassroomResource;
 use App\Http\Resources\StudentEnrollmentResource\StudentEnrollmentResource;
+use App\Http\Resources\UserResource\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\StudentEnrollment;
+use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
@@ -24,10 +27,10 @@ class StudentEnrollmentController extends Controller
         $this->apiResponse = $apiResponse;
     }
 
-    // pakai query param /student-enrollments?classroom_id=ClassroomID
+    // pakai query param /student-enrollments?classroomID=classroomID
     public function index(Request $request)
     {
-        $classroomID = $request->query('classroom_id');
+        $classroomID = $request->query('classroomID');
 
         if (!isset($classroomID) || $classroomID === '') $result = $this->getAllStudentEnrollmentList();
         else $result = $this->getListStudentsByClassroomID($classroomID);
@@ -62,6 +65,12 @@ class StudentEnrollmentController extends Controller
             data: StudentEnrollmentResource::collection($enrollments),
             codeResponse: $result->codeResponse
         );
+    }
+
+    public function show($id)
+    {
+        dd($id);
+        return null;
     }
 
     public function getAllStudentEnrollmentList(): ResponseDto
@@ -202,6 +211,7 @@ class StudentEnrollmentController extends Controller
     //     }
     // }
 
+    // note: student terdaftar di kelas mana aja
     public function studentClassroom(Request $request)
     {
         //get users
@@ -214,5 +224,33 @@ class StudentEnrollmentController extends Controller
             //return collection of users as a resource
             return new StudentEnrollmentResource(true, 'Students Class', $users->classroom_id);
         }
+    }
+
+    // note: dapetin list student yang belum terdaftar di kelas tersebut (classroomID), biar ga duplicate student yang sama di kelas yang sama
+    public function getAvailableStudents(GetAvailableStudentsByClassroomRequest $request)
+    {
+        $validatedRequest = $request->validated();
+        $classroomID = $validatedRequest['classroomID'];
+
+        // if (!is_numeric($classroomID) || intval($classroomID) != $classroomID) {
+        //     return $this->apiResponse->errorResponse(
+        //         message: "Invalid Classroom ID.",
+        //         errors: ['Invalid Classroom ID'],
+        //         codeResponse: 400
+        //     );
+        // }
+
+        $listOfEnrolledUsersID = StudentEnrollment::where('classroom_id', $classroomID)->pluck('user_id');
+
+        $availableUsers = User::whereNotIn('id', $listOfEnrolledUsersID)->get();
+
+        $message = "List of users not in classroom retrieved successfully.";
+        if ($availableUsers->isEmpty()) $message = "No available user found.";
+
+        return $this->apiResponse->successResponse(
+            message: $message,
+            data: UserResource::collection($availableUsers),
+            codeResponse: 200
+        );
     }
 }

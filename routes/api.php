@@ -27,10 +27,14 @@ use Illuminate\Support\Facades\Route;
 //default api
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/users', UserController::class);
+
     // CHANGE: better penamaan end point samain, di sini penamaannya classroom,
     // jadi end point nya classrooms aja
     Route::apiResource('/classrooms', ClassroomController::class);
-    Route::apiResource('/student-enrollments', StudentEnrollmentController::class);
+
+    Route::apiResource('/student-enrollments', StudentEnrollmentController::class)->except(['show']);
+    Route::get('/student-enrollments/available', [StudentEnrollmentController::class, 'getAvailableStudents']);
+    Route::get('/student-enrollments/{student_enrollment}', [StudentEnrollmentController::class, 'show']);
 
     Route::apiResource('/courses', CourseController::class);
     Route::put('/courses/{course}/teachers', [CourseController::class, 'assignTeacher']);
