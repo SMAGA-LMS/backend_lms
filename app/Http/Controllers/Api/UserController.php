@@ -132,7 +132,7 @@ class UserController extends Controller
             'username' => $newUsername,
             'role'     => $validatedNewUser['role'],
             'avatar'   => $imageDb,
-            'password' => Hash::make($validatedNewUser['password']),
+            'password' => Hash::make($newUsername),
         ]);
 
         // $users = DB::insert('insert into users (name, role, avatar, password) values (?, ?, ?, ?)', [$request->name, $request->role, $image->hashName(), Hash::make($request->password)]);
