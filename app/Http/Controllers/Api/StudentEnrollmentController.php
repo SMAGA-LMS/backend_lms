@@ -192,6 +192,20 @@ class StudentEnrollmentController extends Controller
 
         //create student enrollment
         try {
+            // Check if the student is already enrolled in the classroom
+            $existingEnrollment = StudentEnrollment::where('user_id', $validatedRequest['userID'])
+                ->where('classroom_id', $validatedRequest['classroomID'])
+                ->first();
+
+            if ($existingEnrollment) {
+                return $this->apiResponse->errorResponse(
+                    message: 'The student is already enrolled in this classroom.',
+                    errors: ['Student already enrolled'],
+                    codeResponse: 409
+                );
+            }
+
+            // Create new student enrollment
             $newStudentEnrollment = StudentEnrollment::create([
                 'user_id'     => $validatedRequest['userID'],
                 'classroom_id' => $validatedRequest['classroomID'],
