@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\ClassroomController;
 use App\Http\Controllers\Api\CourseController;
+use App\Http\Controllers\Api\StudentEnrollmentController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -29,9 +30,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // CHANGE: better penamaan end point samain, di sini penamaannya classroom,
     // jadi end point nya classrooms aja
     Route::apiResource('/classrooms', ClassroomController::class);
+    Route::apiResource('/student-enrollments', StudentEnrollmentController::class);
 
-    Route::apiResource('courses', CourseController::class);
-    Route::put('courses/{course}/teachers', [CourseController::class, 'assignTeacher']);
+    Route::apiResource('/courses', CourseController::class);
+    Route::put('/courses/{course}/teachers', [CourseController::class, 'assignTeacher']);
 });
 
 // dipindahin ke atas, pake middleware auth:sanctum
