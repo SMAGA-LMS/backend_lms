@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\DataTransferObjects\ResponseDto;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StudentEnrollmentRequest\AssignNewStudentRequest;
 use App\Http\Requests\StudentEnrollmentRequest\GetAvailableStudentsByClassroomRequest;
 use App\Http\Resources\StudentEnrollmentResource\ListStudentEnrolledClassroomResource;
 use App\Http\Resources\StudentEnrollmentResource\StudentEnrollmentResource;
@@ -69,7 +70,6 @@ class StudentEnrollmentController extends Controller
 
     public function show($id)
     {
-        dd($id);
         return null;
     }
 
@@ -174,27 +174,62 @@ class StudentEnrollmentController extends Controller
         );
     }
 
-    public function store(Request $request)
+    public function store(AssignNewStudentRequest $request)
     {
-        //define validation rules
-        $validator = Validator::make($request->all(), [
-            'user_id'      => 'required',
-            'classroom_id'     => 'required',
-        ]);
+        $validatedRequest = $request->validated();
 
-        //check if validation fails
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        // CHANGE: move to AssignNewStudentRequest
+        // //define validation rules
+        // $validator = Validator::make($request->all(), [
+        //     'user_id'      => 'required',
+        //     'classroom_id'     => 'required',
+        // ]);
+
+        // //check if validation fails
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
+
+        //create student enrollment
+        try {
+            $newStudentEnrollment = StudentEnrollment::create([
+                'user_id'     => $validatedRequest['userID'],
+                'classroom_id' => $validatedRequest['classroomID'],
+            ]);
+
+            $studentEnrollmentData = StudentEnrollment::query()
+                ->join('users', 'student_enrollments.user_id', '=', 'users.id')
+                ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
+                ->select(
+                    'student_enrollments.id as id',
+                    'student_enrollments.classroom_id',
+                    'student_enrollments.user_id',
+                    'users.id as user_id',
+                    'users.name as user_name',
+                    'users.username as user_username',
+                    'users.role as user_role',
+                    'users.avatar as user_avatar',
+                    'classrooms.id as classroom_id',
+                    'classrooms.name as classroom_name',
+                    'classrooms.grade as classroom_grade'
+                )
+                ->where('student_enrollments.id', $newStudentEnrollment->id)
+                ->first();
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: 'An error occurred while assigning a new student',
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
         }
 
-        //create class
-        $classes = StudentEnrollment::create([
-            'user_id'     => $request->user_id,
-            'classroom_id' => $request->classroom_id,
-        ]);
-
         //return response
-        return new StudentEnrollmentResource(true, 'New Student-Class added', $classes);
+        // return new StudentEnrollmentResource(true, 'New Student-Class added', $classes);
+        return $this->apiResponse->successResponse(
+            message: 'New student added to the class.',
+            data: new StudentEnrollmentResource($studentEnrollmentData),
+            codeResponse: 201
+        );
     }
 
     // CHANGE: move to getListStudentsByClassroomID()
