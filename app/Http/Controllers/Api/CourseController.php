@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CourseRequest\AddNewCourseRequest;
-use App\Http\Requests\CourseRequest\AssignTeacherRequest;
+use App\Http\Requests\CourseRequest\AssignNewTeacherRequest;
 use App\Http\Resources\ClassroomResource\ClassroomResource;
 use App\Http\Resources\CourseResource\CourseResource;
 use Illuminate\Http\Request;
@@ -198,7 +198,7 @@ class CourseController extends Controller
         return new CourseResource(true, 'New Teacher added', $course);
     }
 
-    public function assignTeacher(AssignTeacherRequest $request, $id)
+    public function assignTeacher(AssignNewTeacherRequest $request, $id)
     {
         $validatedTeacher = $request->validated();
 
