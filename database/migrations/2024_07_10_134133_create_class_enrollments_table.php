@@ -15,11 +15,16 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('classroom_id');
             $table->unsignedBigInteger('course_id');
+            $table->unsignedBigInteger('user_id');
             $table->timestamps();
 
             $table->foreign('course_id')->references('id')->on('courses');
             $table->foreign('classroom_id')->references('id')->on('classrooms');
+            $table->foreign('user_id')->references('id')->on('users');
         });
+
+        // how to php artisan migrate specific migration
+        // 
     }
 
     /**
