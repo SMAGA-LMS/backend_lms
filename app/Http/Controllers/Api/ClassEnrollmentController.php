@@ -66,8 +66,8 @@ class ClassEnrollmentController extends Controller
             );
         }
 
-        $message = "List of enrolled course retrieved successfully.";
-        if (empty($enrolledCourses)) $message = "No enrolled course found.";
+        $message = "List of class enrollment retrieved successfully.";
+        if (empty($enrolledCourses)) $message = "No class enrollment found.";
 
         //return collection of users as a resource
         // return new ClassEnrollmentResource(true, 'List Data Course-Class', $courses);
