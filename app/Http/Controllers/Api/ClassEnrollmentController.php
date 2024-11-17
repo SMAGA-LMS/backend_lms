@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ClassEnrollmentRequest\AddNewClassEnrollmentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -127,26 +128,76 @@ class ClassEnrollmentController extends Controller
         }
     }
 
-    public function store(Request $request)
+    public function store(AddNewClassEnrollmentRequest $request)
     {
-        //define validation rules
-        $validator = Validator::make($request->all(), [
-            'course_id'      => 'required',
-            'classroom_id'     => 'required',
-        ]);
+        // CHANGE: move validation to AddNewClassEnrollmentRequest
+        // //define validation rules
+        // $validator = Validator::make($request->all(), [
+        //     'course_id'      => 'required',
+        //     'classroom_id'     => 'required',
+        // ]);
 
-        //check if validation fails
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        // //check if validation fails
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
+
+        $validatedRequest = $request->validated();
+
+        try {
+            //create class
+            $newClassEnrollment = ClassEnrollment::create([
+                'course_id'     => $validatedRequest['courseID'],
+                'classroom_id' => $validatedRequest['classroomID'],
+                'user_id'       => $validatedRequest['userID'],
+            ]);
+
+            $classEnrollmentData = DB::table('class_enrollments')
+                ->leftJoin('classrooms', 'class_enrollments.classroom_id', '=', 'classrooms.id')
+                ->leftJoin('courses', 'class_enrollments.course_id', '=', 'courses.id')
+                ->leftJoin('users', 'class_enrollments.user_id', '=', 'users.id')
+                ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
+                ->select(
+                    'class_enrollments.id as id',
+                    'class_enrollments.course_id',
+                    'class_enrollments.classroom_id',
+                    'classrooms.id as classroom_id',
+                    'classrooms.name as classroom_name',
+                    'classrooms.grade as classroom_grade',
+
+                    'courses.id as course_id',
+                    'courses.name as course_name',
+                    'courses.user_id as course_user_id',
+                    'courses.grade as course_grade',
+
+                    'users.id as user_id',
+                    'users.name as user_name',
+                    'users.username as user_username',
+                    'users.role as user_role',
+                    'users.avatar as user_avatar',
+
+                    'pic_courses.id as pic_course_id',
+                    'pic_courses.name as pic_course_name',
+                    'pic_courses.username as pic_course_username',
+                    'pic_courses.role as pic_course_role',
+                    'pic_courses.avatar as pic_course_avatar',
+                )
+                ->where('class_enrollments.id', $newClassEnrollment->id)
+                ->first();
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "An error occurred while creating class enrollment",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
         }
 
-        //create class
-        $classes = ClassEnrollment::create([
-            'course_id'     => $request->course_id,
-            'classroom_id' => $request->classroom_id,
-        ]);
-
         //return response
-        return new ClassEnrollmentResource(true, 'New Class-Course added', $classes);
+        // return new ClassEnrollmentResource(true, 'New Class-Course added', $classes);
+        return $this->apiResponse->successResponse(
+            message: "New enrolled course added",
+            data: new ClassEnrollmentResource($classEnrollmentData),
+            codeResponse: 201
+        );
     }
 }

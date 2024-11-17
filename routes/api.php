@@ -33,8 +33,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // jadi end point nya classrooms aja
     Route::apiResource('/classrooms', ClassroomController::class);
 
+    Route::get('/classrooms/{classroom_id}/students', [StudentEnrollmentController::class, 'getStudentsByClassroom']);
     Route::apiResource('/student-enrollments', StudentEnrollmentController::class)->except(['show']);
-    Route::get('/student-enrollments/available', [StudentEnrollmentController::class, 'getAvailableStudents']);
     Route::get('/student-enrollments/{student_enrollment}', [StudentEnrollmentController::class, 'show']);
 
     Route::apiResource('/courses', CourseController::class);
