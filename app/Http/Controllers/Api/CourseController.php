@@ -29,8 +29,21 @@ class CourseController extends Controller
     //
     public function index()
     {
-        //get class
-        $courses = Course::with('user')->get();
+        //get courses
+        $courses = DB::table('courses')
+            ->join('users', 'courses.user_id', '=', 'users.id')
+            ->select(
+                'courses.id',
+                'courses.name',
+                'courses.grade',
+
+                'users.id as user_id',
+                'users.name as user_name',
+                'users.username as user_username',
+                'users.role as user_role',
+                'users.avatar as user_avatar'
+            )
+            ->get();
 
         $message = "List of courses retrieved successfully.";
         if (empty($courses)) $message = "No courses found.";
@@ -55,8 +68,22 @@ class CourseController extends Controller
             );
         }
 
-        //find post by ID
-        $course = Course::with('user')->find($id);
+        //find course by ID
+        $course = DB::table('courses')
+            ->join('users', 'courses.user_id', '=', 'users.id')
+            ->select(
+                'courses.id',
+                'courses.name',
+                'courses.grade',
+
+                'users.id as user_id',
+                'users.name as user_name',
+                'users.username as user_username',
+                'users.role as user_role',
+                'users.avatar as user_avatar'
+            )
+            ->where('courses.id', $id)
+            ->first();
 
         $message = "Course data retrieved successfully.";
         if (empty($course)) $message = "Course not found.";
@@ -218,6 +245,8 @@ class CourseController extends Controller
         }
 
         try {
+            // ini belum return data join ke table user, jadi return response nya masih table course aja
+            // object user ada, tapi ke isi yang user.id aja, kalau user.name, dll pasti null value nya (karena belum di-join)
             $course->update([
                 'user_id' => $userID,
             ]);
