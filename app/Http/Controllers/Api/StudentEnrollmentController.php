@@ -170,9 +170,9 @@ class StudentEnrollmentController extends Controller
         }
     }
 
-    public function getStudentsByClassroom($classroomID, Request $request)
+    public function getStudentsByClassroom(Request $request, $id)
     {
-        if (!is_numeric($classroomID) || intval($classroomID) != $classroomID) {
+        if (!is_numeric($id) || intval($id) != $id) {
             return $this->apiResponse->errorResponse(
                 message: "Invalid Classroom ID.",
                 errors: ['Invalid Classroom ID'],
@@ -180,7 +180,7 @@ class StudentEnrollmentController extends Controller
             );
         }
 
-        $classroom = DB::table('classrooms')->where('id', intval($classroomID))->first();
+        $classroom = DB::table('classrooms')->where('id', intval($id))->first();
         if ($classroom == null) {
             return $this->apiResponse->errorResponse(
                 message: "Classroom not found.",
@@ -191,10 +191,10 @@ class StudentEnrollmentController extends Controller
 
         $isAvailable = $request->query('isAvailable');
         if ($isAvailable == true) {
-            return $this->getAvailableStudents($classroomID);
+            return $this->getAvailableStudents($id);
         }
 
-        $studentEnrollments = StudentEnrollment::where('classroom_id', $classroomID)
+        $studentEnrollments = StudentEnrollment::where('classroom_id', $id)
             ->join('users', 'student_enrollments.user_id', '=', 'users.id')
             ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
             ->select(
@@ -215,7 +215,7 @@ class StudentEnrollmentController extends Controller
 
         if (empty($studentEnrollments)) {
             return $this->apiResponse->successResponse(
-                message: "No student found in classroom " . $classroomID,
+                message: "No student found in classroom " . $classroom->name,
                 data: [],
                 codeResponse: 200
             );
