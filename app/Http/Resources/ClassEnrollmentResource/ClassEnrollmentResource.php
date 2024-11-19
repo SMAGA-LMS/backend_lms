@@ -23,19 +23,16 @@ class ClassEnrollmentResource extends JsonResource
             'grade' => $this->classroom_grade,
         ] : null;
 
-        $pic_course = $this->pic_course_id ? (object)[
-            'id' => $this->pic_course_id,
-            'name' => $this->pic_course_name,
-            'username' => $this->pic_course_username,
-            'role' => $this->pic_course_role,
-            'avatar' => $this->pic_course_avatar,
-        ] : null;
-
         $course = $this->course_id ? (object)[
             'id' => $this->course_id,
             'name' => $this->course_name,
-            'user' => $pic_course,
             'grade' => $this->course_grade,
+
+            'user_id' => $this->pic_course_id,
+            'user_name' => $this->pic_course_name,
+            'user_username' => $this->pic_course_username,
+            'user_role' => $this->pic_course_role,
+            'user_avatar' => $this->pic_course_avatar,
         ] : null;
 
         $user = $this->user_id ? (object)[

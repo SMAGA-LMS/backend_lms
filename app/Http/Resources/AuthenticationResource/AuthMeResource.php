@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\AuthenticationResource;
 
+use App\Http\Resources\UserResource\UserResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -22,13 +23,7 @@ class AuthMeResource extends JsonResource
     public function toArray(Request $request): array
     {
         $dataResponse = [
-            'user' => [
-                'id' => $this->user->id,
-                'name' => $this->user->name,
-                'username' => $this->user->username,
-                'role' => $this->user->role,
-                'avatar' => $this->user->avatar
-            ],
+            'user' => $this->user ? new UserResource($this->user) : null,
         ];
 
         return $dataResponse;

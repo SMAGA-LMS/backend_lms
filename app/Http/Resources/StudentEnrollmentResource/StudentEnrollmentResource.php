@@ -16,20 +16,24 @@ class StudentEnrollmentResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        $classroom = $this->classroom_id ? (object)[
+            'id' => $this->classroom_id,
+            'name' => $this->classroom_name,
+            'grade' => $this->classroom_grade,
+        ] : null;
+
+        $user = $this->user_id ? (object)[
+            'id' => $this->user_id,
+            'name' => $this->user_name,
+            'username' => $this->user_username,
+            'role' => $this->user_role,
+            'avatar' => $this->user_avatar,
+        ] : null;
+
         $responseData = [
-            'id' => $this->resource['id'],
-            'classroom' => new ClassroomResource((object)[
-                'id' => $this->resource['classroom_id'],
-                'name' => $this->resource['classroom_name'],
-                'grade' => $this->resource['classroom_grade'],
-            ]),
-            'user' => new UserResource((object)[
-                'id' => $this->resource['user_id'],
-                'name' => $this->resource['user_name'],
-                'username' => $this->resource['user_username'],
-                'role' => $this->resource['user_role'],
-                'avatar' => $this->resource['user_avatar'],
-            ]),
+            'id' => $this->id,
+            'classroom' => $classroom ? new ClassroomResource($classroom) : null,
+            'user' => $user ? new UserResource($user) : null,
         ];
 
         return $responseData;
