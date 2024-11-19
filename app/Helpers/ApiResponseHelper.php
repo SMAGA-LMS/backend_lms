@@ -9,7 +9,8 @@ class ApiResponseHelper
         return response()->json([
             'success' => true,
             'message' => $message,
-            'data' => $data
+            'data' => $data,
+            'errors' => null,
         ], $codeResponse);
     }
 
@@ -18,7 +19,8 @@ class ApiResponseHelper
         return response()->json([
             'success' => false,
             'message' => $message,
-            'errors' => $this->formatErrors($errors)
+            'data' => null,
+            'errors' => $this->formatErrors($errors),
         ], $codeResponse);
     }
 
