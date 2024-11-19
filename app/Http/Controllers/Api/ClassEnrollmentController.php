@@ -38,6 +38,7 @@ class ClassEnrollmentController extends Controller
                     'class_enrollments.id as id',
                     'class_enrollments.course_id',
                     'class_enrollments.classroom_id',
+
                     'classrooms.id as classroom_id',
                     'classrooms.name as classroom_name',
                     'classrooms.grade as classroom_grade',
@@ -195,44 +196,13 @@ class ClassEnrollmentController extends Controller
 
         try {
             //create class
+            // ini belum return data join ke table user, jadi return response nya masih table class enrollment aja
+            // object user ada, tapi ke isi yang user.id aja, kalau user.name, dll pasti null value nya (karena belum di-join)
             $newClassEnrollment = ClassEnrollment::create([
                 'course_id'     => $validatedRequest['courseID'],
                 'classroom_id' => $validatedRequest['classroomID'],
                 'user_id'       => $validatedRequest['userID'],
             ]);
-
-            $classEnrollmentData = DB::table('class_enrollments')
-                ->leftJoin('classrooms', 'class_enrollments.classroom_id', '=', 'classrooms.id')
-                ->leftJoin('courses', 'class_enrollments.course_id', '=', 'courses.id')
-                ->leftJoin('users', 'class_enrollments.user_id', '=', 'users.id')
-                ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
-                ->select(
-                    'class_enrollments.id as id',
-                    'class_enrollments.course_id',
-                    'class_enrollments.classroom_id',
-                    'classrooms.id as classroom_id',
-                    'classrooms.name as classroom_name',
-                    'classrooms.grade as classroom_grade',
-
-                    'courses.id as course_id',
-                    'courses.name as course_name',
-                    'courses.user_id as course_user_id',
-                    'courses.grade as course_grade',
-
-                    'users.id as user_id',
-                    'users.name as user_name',
-                    'users.username as user_username',
-                    'users.role as user_role',
-                    'users.avatar as user_avatar',
-
-                    'pic_courses.id as pic_course_id',
-                    'pic_courses.name as pic_course_name',
-                    'pic_courses.username as pic_course_username',
-                    'pic_courses.role as pic_course_role',
-                    'pic_courses.avatar as pic_course_avatar',
-                )
-                ->where('class_enrollments.id', $newClassEnrollment->id)
-                ->first();
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "An error occurred while creating class enrollment",
@@ -245,7 +215,7 @@ class ClassEnrollmentController extends Controller
         // return new ClassEnrollmentResource(true, 'New Class-Course added', $classes);
         return $this->apiResponse->successResponse(
             message: "New enrolled course added",
-            data: new ClassEnrollmentResource($classEnrollmentData),
+            data: new ClassEnrollmentResource($newClassEnrollment),
             codeResponse: 201
         );
     }
