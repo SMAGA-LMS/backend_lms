@@ -27,18 +27,20 @@ class StudentEnrollmentController extends Controller
         // $classes = StudentEnrollment::all();
 
         try {
-            $studentEnrollments = StudentEnrollment::query()
+            $studentEnrollments = DB::table('student_enrollments')
                 ->join('users', 'student_enrollments.user_id', '=', 'users.id')
                 ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
                 ->select(
                     'student_enrollments.id as id',
                     'student_enrollments.classroom_id',
                     'student_enrollments.user_id',
+
                     'users.id as user_id',
                     'users.name as user_name',
                     'users.username as user_username',
                     'users.role as user_role',
                     'users.avatar as user_avatar',
+
                     'classrooms.id as classroom_id',
                     'classrooms.name as classroom_name',
                     'classrooms.grade as classroom_grade'
@@ -101,29 +103,12 @@ class StudentEnrollmentController extends Controller
             }
 
             // Create new student enrollment
+            // ini belum return data join ke table user, jadi return response nya masih table student_enrollment aja
+            // object user ada, tapi ke isi yang user.id aja, kalau user.name, dll pasti null value nya (karena belum di-join)
             $newStudentEnrollment = StudentEnrollment::create([
                 'user_id'     => $validatedRequest['userID'],
                 'classroom_id' => $validatedRequest['classroomID'],
             ]);
-
-            $studentEnrollmentData = StudentEnrollment::query()
-                ->join('users', 'student_enrollments.user_id', '=', 'users.id')
-                ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
-                ->select(
-                    'student_enrollments.id as id',
-                    'student_enrollments.classroom_id',
-                    'student_enrollments.user_id',
-                    'users.id as user_id',
-                    'users.name as user_name',
-                    'users.username as user_username',
-                    'users.role as user_role',
-                    'users.avatar as user_avatar',
-                    'classrooms.id as classroom_id',
-                    'classrooms.name as classroom_name',
-                    'classrooms.grade as classroom_grade'
-                )
-                ->where('student_enrollments.id', $newStudentEnrollment->id)
-                ->first();
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: 'An error occurred while assigning a new student',
@@ -136,7 +121,7 @@ class StudentEnrollmentController extends Controller
         // return new StudentEnrollmentResource(true, 'New Student-Class added', $classes);
         return $this->apiResponse->successResponse(
             message: 'New student added to the class.',
-            data: new StudentEnrollmentResource($studentEnrollmentData),
+            data: new StudentEnrollmentResource($newStudentEnrollment),
             codeResponse: 201
         );
     }
@@ -194,26 +179,29 @@ class StudentEnrollmentController extends Controller
             return $this->getAvailableStudents($id);
         }
 
-        $studentEnrollments = StudentEnrollment::where('classroom_id', $id)
+        $students = DB::table('student_enrollments')
             ->join('users', 'student_enrollments.user_id', '=', 'users.id')
             ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
             ->select(
-                'student_enrollments.id as id',
-                'student_enrollments.classroom_id',
-                'student_enrollments.user_id',
-                'users.id as user_id',
-                'users.name as user_name',
-                'users.username as user_username',
-                'users.role as user_role',
-                'users.avatar as user_avatar',
-                'classrooms.id as classroom_id',
-                'classrooms.name as classroom_name',
-                'classrooms.grade as classroom_grade'
+                'users.id as id',
+                'users.name as name',
+                'users.username as username',
+                'users.role as role',
+                'users.avatar as avatar'
             )
-            ->get()
-            ->toArray();
+            ->where('student_enrollments.classroom_id', $id)
+            ->get();
+        // ->map(function ($student) {
+        //     return (object) [
+        //         'id' => $student->user_id,
+        //         'name' => $student->user_name,
+        //         'username' => $student->user_username,
+        //         'role' => $student->user_role,
+        //         'avatar' => $student->user_avatar,
+        //     ];
+        // });
 
-        if (empty($studentEnrollments)) {
+        if ($students->isEmpty()) {
             return $this->apiResponse->successResponse(
                 message: "No student found in classroom " . $classroom->name,
                 data: [],
@@ -222,8 +210,8 @@ class StudentEnrollmentController extends Controller
         }
 
         return $this->apiResponse->successResponse(
-            message: "List of students retrieved successfully.",
-            data: StudentEnrollmentResource::collection($studentEnrollments),
+            message: "List of students in classroom " . $classroom->name . " retrieved successfully.",
+            data: UserResource::collection($students),
             codeResponse: 200
         );
     }
