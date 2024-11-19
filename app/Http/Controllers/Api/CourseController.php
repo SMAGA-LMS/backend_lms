@@ -47,7 +47,7 @@ class CourseController extends Controller
 
     public function show($id)
     {
-        if (!is_numeric($id)) {
+        if (!is_numeric($id) || intval($id) != $id) {
             return $this->apiResponse->errorResponse(
                 message: "Invalid Course ID",
                 errors: ['Invalid Course ID'],
@@ -198,7 +198,7 @@ class CourseController extends Controller
         return new CourseResource(true, 'New Teacher added', $course);
     }
 
-    public function assignTeacher(AssignNewTeacherRequest $request, $id)
+    public function assignTeacherToCourse(AssignNewTeacherRequest $request, $id)
     {
         $validatedTeacher = $request->validated();
 
