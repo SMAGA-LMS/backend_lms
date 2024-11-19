@@ -33,14 +33,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // jadi end point nya classrooms aja
     Route::apiResource('/classrooms', ClassroomController::class);
 
-    Route::get('/classrooms/{classroom_id}/students', [StudentEnrollmentController::class, 'getStudentsByClassroom']);
+    Route::get('/classrooms/{classroom}/students', [StudentEnrollmentController::class, 'getStudentsByClassroom']);
     Route::apiResource('/student-enrollments', StudentEnrollmentController::class)->except(['show']);
     Route::get('/student-enrollments/{student_enrollment}', [StudentEnrollmentController::class, 'show']);
 
     Route::apiResource('/courses', CourseController::class);
-    Route::put('/courses/{course}/teachers', [CourseController::class, 'assignTeacher']);
+    Route::put('/courses/{course}/teachers', [CourseController::class, 'assignTeacherToCourse']);
 
     Route::apiResource('/class-enrollments', ClassEnrollmentController::class);
+    Route::put('/class-enrollments/{class_enrollments}/teachers', [ClassEnrollmentController::class, 'assignTeacherToClassEnrollment']);
 });
 
 // dipindahin ke atas, pake middleware auth:sanctum

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ClassEnrollmentRequest\AddNewClassEnrollmentRequest;
+use App\Http\Requests\ClassEnrollmentRequest\AssignNewTeacherRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -81,15 +82,63 @@ class ClassEnrollmentController extends Controller
 
     public function show($id)
     {
-        //find class by ID
-        $classenr = ClassEnrollment::find($id);
+        if (!is_numeric($id) || intval($id) != $id) {
+            return $this->apiResponse->errorResponse(
+                message: "Invalid Class Enrollment ID",
+                errors: ['Invalid Class Enrollment ID'],
+                codeResponse: 400
+            );
+        }
+
+        //find class enrollment by ID
+        // $classenr = ClassEnrollment::find($id);
+        $classEnrollment = DB::table('class_enrollments')
+            ->leftJoin('classrooms', 'class_enrollments.classroom_id', '=', 'classrooms.id')
+            ->leftJoin('courses', 'class_enrollments.course_id', '=', 'courses.id')
+            ->leftJoin('users', 'class_enrollments.user_id', '=', 'users.id')
+            ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
+            ->select(
+                'class_enrollments.id as id',
+                'class_enrollments.course_id',
+                'class_enrollments.classroom_id',
+                'classrooms.id as classroom_id',
+                'classrooms.name as classroom_name',
+                'classrooms.grade as classroom_grade',
+
+                'courses.id as course_id',
+                'courses.name as course_name',
+                'courses.user_id as course_user_id',
+                'courses.grade as course_grade',
+
+                'users.id as user_id',
+                'users.name as user_name',
+                'users.username as user_username',
+                'users.role as user_role',
+                'users.avatar as user_avatar',
+
+                'pic_courses.id as pic_course_id',
+                'pic_courses.name as pic_course_name',
+                'pic_courses.username as pic_course_username',
+                'pic_courses.role as pic_course_role',
+                'pic_courses.avatar as pic_course_avatar',
+            )
+            ->where('class_enrollments.id', $id)
+            ->first();
+
+        $message = "Course data retrieved successfully.";
+        if (empty($classEnrollment)) $message = "Course not found.";
 
         //return single post as a resource
-        if ($classenr == null) {
-            return new ClassEnrollmentResource(false, 'Class-Course not found', $classenr);
-        } else {
-            return new ClassEnrollmentResource(true, 'Detail Class-Course', $classenr);
-        }
+        // if ($classenr == null) {
+        //     return new ClassEnrollmentResource(false, 'Class-Course not found', $classenr);
+        // } else {
+        //     return new ClassEnrollmentResource(true, 'Detail Class-Course', $classenr);
+        // }
+        return $this->apiResponse->successResponse(
+            message: "Class enrollment data retrieved successfully.",
+            data: new ClassEnrollmentResource($classEnrollment),
+            codeResponse: 200
+        );
     }
 
     public function getCoursesClassID(Request $request)
@@ -198,6 +247,49 @@ class ClassEnrollmentController extends Controller
             message: "New enrolled course added",
             data: new ClassEnrollmentResource($classEnrollmentData),
             codeResponse: 201
+        );
+    }
+
+    public function assignTeacherToClassEnrollment(AssignNewTeacherRequest $request, $id)
+    {
+        if (!is_numeric($id) || intval($id) != $id) {
+            return $this->apiResponse->errorResponse(
+                message: "Invalid Class Enrollment ID",
+                errors: ['Invalid Class Enrollment ID'],
+                codeResponse: 400
+            );
+        }
+
+        $validatedTeacher = $request->validated();
+
+        try {
+            $classEnrollment = ClassEnrollment::find($id);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Class Enrollment not found.",
+                errors: $th->getMessage(),
+                codeResponse: 404
+            );
+        }
+
+        $userID = $validatedTeacher['userID'];
+
+        try {
+            $classEnrollment->update([
+                'user_id' => $userID,
+            ]);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to assign new teacher.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+        return $this->apiResponse->successResponse(
+            message: "Teacher updated.",
+            data: new ClassEnrollmentResource($classEnrollment),
+            codeResponse: 200
         );
     }
 }
