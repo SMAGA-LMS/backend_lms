@@ -33,7 +33,7 @@ class ModuleResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'course' => $this->course_id ? new CourseResource($course) : null,
-            'file' => url('storage/Modules/' . $this->file),
+            'file' => $this->file ? url('storage/Modules/' . $this->file) : null,
         ];
 
         return $dataResponse;

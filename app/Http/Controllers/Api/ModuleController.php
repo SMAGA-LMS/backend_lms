@@ -121,15 +121,61 @@ class ModuleController extends Controller
 
     public function show($id)
     {
+        if (!is_numeric($id) || intval($id) != $id) {
+            return $this->apiResponse->errorResponse(
+                message: "Invalid Module ID",
+                errors: ['Invalid Module ID'],
+                codeResponse: 400
+            );
+        }
+
         //find post by ID
-        $module = Module::find($id);
+        // $module = Module::find($id);
+        try {
+            $module = DB::table('modules')
+                ->join('courses', 'modules.course_id', '=', 'courses.id')
+                ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
+                ->select(
+                    'modules.id',
+                    'modules.name',
+                    'modules.description',
+                    'modules.file',
+
+                    'courses.id as course_id',
+                    'courses.name as course_name',
+                    'courses.user_id as course_user_id',
+                    'courses.grade as course_grade',
+
+                    'pic_courses.id as pic_course_id',
+                    'pic_courses.name as pic_course_name',
+                    'pic_courses.username as pic_course_username',
+                    'pic_courses.role as pic_course_role',
+                    'pic_courses.avatar as pic_course_avatar',
+                )
+                ->where('modules.id', $id)
+                ->first();
+        } catch (\Exception $e) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve module",
+                errors: $e->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+        $message = "Module retrieved successfully.";
+        if (empty($module)) $message = "No module found.";
 
         //return single post as a resource
-        if ($module == null) {
-            return new ModuleResource(false, 'Module not found', $module);
-        } else {
-            return new ModuleResource(true, 'Detail module', $module);
-        }
+        // if ($module == null) {
+        //     return new ModuleResource(false, 'Module not found', $module);
+        // } else {
+        //     return new ModuleResource(true, 'Detail module', $module);
+        // }
+        return $this->apiResponse->successResponse(
+            message: $message,
+            data: new ModuleResource($module),
+            codeResponse: 200
+        );
     }
 
     public function update(Request $request, $id)
