@@ -94,7 +94,18 @@ class ModuleController extends Controller
         // }
 
         $validatedRequest = $request->validated();
+        $module = $this->createNewModule($validatedRequest, $request);
 
+        // return new ModuleResource(true, 'New Module added', $modules);
+        return $this->apiResponse->successResponse(
+            message: "New Module added",
+            data: new ModuleResource($module),
+            codeResponse: 201
+        );
+    }
+
+    public function createNewModule($validatedRequest, $request)
+    {
         //upload image
         if ($request->hasFile('file')) {
             $modulefile = $request->file('file');
@@ -104,21 +115,13 @@ class ModuleController extends Controller
             $moduleDb = null;
         }
 
-
         //create module
-        $module = Module::create([
+        return Module::create([
             'name'     => $validatedRequest['name'],
             'description'   => $validatedRequest['description'],
             'file'     => $moduleDb,
             // 'course_id' => $validatedRequest['courseID'] // read database/migrations/2024_08_07_130656_create_modules_table.php
         ]);
-
-        // return new ModuleResource(true, 'New Module added', $modules);
-        return $this->apiResponse->successResponse(
-            message: "New Module added",
-            data: new ModuleResource($module),
-            codeResponse: 201
-        );
     }
 
     public function show($id)

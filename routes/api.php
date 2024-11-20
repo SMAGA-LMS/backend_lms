@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\ClassEnrollmentController;
 use App\Http\Controllers\Api\ClassroomController;
 use App\Http\Controllers\Api\CourseController;
+use App\Http\Controllers\Api\CourseModuleController;
 use App\Http\Controllers\Api\ModuleController;
 use App\Http\Controllers\Api\StudentEnrollmentController;
 use App\Http\Controllers\Api\UserController;
@@ -44,6 +45,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::put('/class-enrollments/{class_enrollments}/teachers', [ClassEnrollmentController::class, 'assignTeacherToClassEnrollment']);
 
     Route::apiResource('/modules', ModuleController::class);
+
+    Route::apiResource('/course-modules', CourseModuleController::class);
 });
 
 // dipindahin ke atas, pake middleware auth:sanctum
