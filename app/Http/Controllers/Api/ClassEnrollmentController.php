@@ -24,12 +24,14 @@ class ClassEnrollmentController extends Controller
         $this->apiResponse = $apiResponse;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         //get class
         // $courses = ClassEnrollment::all();
+
+        $teacherID = $request->query('userID');
         try {
-            $enrolledCourses = DB::table('class_enrollments')
+            $classEnrollmentsQuery = DB::table('class_enrollments')
                 ->leftJoin('classrooms', 'class_enrollments.classroom_id', '=', 'classrooms.id')
                 ->leftJoin('courses', 'class_enrollments.course_id', '=', 'courses.id')
                 ->leftJoin('users', 'class_enrollments.user_id', '=', 'users.id')
@@ -59,8 +61,14 @@ class ClassEnrollmentController extends Controller
                     'pic_courses.username as pic_course_username',
                     'pic_courses.role as pic_course_role',
                     'pic_courses.avatar as pic_course_avatar',
-                )
-                ->get();
+                );
+
+            // get class enrollments by teacher ID
+            if (!empty($teacherID)) {
+                $classEnrollmentsQuery->where('class_enrollments.user_id', $teacherID);
+            }
+
+            $classEnrollments = $classEnrollmentsQuery->get();
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "An error occurred while fetching class enrollments",
@@ -70,13 +78,13 @@ class ClassEnrollmentController extends Controller
         }
 
         $message = "List of class enrollment retrieved successfully.";
-        if (empty($enrolledCourses)) $message = "No class enrollment found.";
+        if (empty($classEnrollments)) $message = "No class enrollment found.";
 
         //return collection of users as a resource
         // return new ClassEnrollmentResource(true, 'List Data Course-Class', $courses);
         return $this->apiResponse->successResponse(
             message: $message,
-            data: ClassEnrollmentResource::collection($enrolledCourses),
+            data: ClassEnrollmentResource::collection($classEnrollments),
             codeResponse: 200
         );
     }

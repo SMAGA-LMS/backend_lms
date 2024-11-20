@@ -48,7 +48,7 @@ class CourseController extends Controller
                 );
 
             if (!empty($picCourseID)) {
-                $coursesQuery->where('user_id', $picCourseID);
+                $coursesQuery->where('courses.user_id', $picCourseID);
             }
 
             $courses = $coursesQuery->get();
