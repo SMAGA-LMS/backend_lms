@@ -1,0 +1,34 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('attendances', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('student_id')->nullable();
+            $table->unsignedBigInteger('classenrollment_id')->nullable();
+            $table->dateTime('date_time');
+            $table->integer('session');
+            $table->timestamps();
+
+            $table->foreign('student_id')->references('id')->on('users');
+            $table->foreign('classenrollment_id')->references('id')->on('class_enrollments');
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('attendances');
+    }
+};
