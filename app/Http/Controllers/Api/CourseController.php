@@ -27,23 +27,38 @@ class CourseController extends Controller
     }
 
     //
-    public function index()
+    public function index(Request $request)
     {
-        //get courses
-        $courses = DB::table('courses')
-            ->leftJoin('users', 'courses.user_id', '=', 'users.id')
-            ->select(
-                'courses.id',
-                'courses.name',
-                'courses.grade',
+        $picCourseID = $request->query('userID');
 
-                'users.id as user_id',
-                'users.name as user_name',
-                'users.username as user_username',
-                'users.role as user_role',
-                'users.avatar as user_avatar'
-            )
-            ->get();
+        //get courses
+        try {
+            $coursesQuery = DB::table('courses')
+                ->leftJoin('users', 'courses.user_id', '=', 'users.id')
+                ->select(
+                    'courses.id',
+                    'courses.name',
+                    'courses.grade',
+
+                    'users.id as user_id',
+                    'users.name as user_name',
+                    'users.username as user_username',
+                    'users.role as user_role',
+                    'users.avatar as user_avatar'
+                );
+
+            if (!empty($picCourseID)) {
+                $coursesQuery->where('user_id', $picCourseID);
+            }
+
+            $courses = $coursesQuery->get();
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve courses.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
+        }
 
         $message = "List of courses retrieved successfully.";
         if (empty($courses)) $message = "No courses found.";
@@ -110,27 +125,28 @@ class CourseController extends Controller
         // }
     }
 
-    public function courseTeacherList(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'user_id'      => 'required',
-        ]);
+    // CHANGE: move to index() method, use query param userID
+    // public function courseTeacherList(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'user_id'      => 'required',
+    //     ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 422);
+    //     }
 
-        //get users
-        $course = DB::table('courses')->where('user_id', $request->user_id)->get();
-        // $course = Course::where('user_id', $request->user_id);
+    //     //get users
+    //     $course = DB::table('courses')->where('user_id', $request->user_id)->get();
+    //     // $course = Course::where('user_id', $request->user_id);
 
-        if ($course == "[]") {
-            return new CourseResource(false, 'No Courses found', $course);
-        } else {
-            //return collection of users as a resource
-            return new CourseResource(true, 'Courses with desired teacher', $course);
-        }
-    }
+    //     if ($course == "[]") {
+    //         return new CourseResource(false, 'No Courses found', $course);
+    //     } else {
+    //         //return collection of users as a resource
+    //         return new CourseResource(true, 'Courses with desired teacher', $course);
+    //     }
+    // }
 
     public function courseGradeList(Request $request)
     {
