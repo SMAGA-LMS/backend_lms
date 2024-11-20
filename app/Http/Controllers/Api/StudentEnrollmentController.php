@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentEnrollmentRequest\AssignNewStudentRequest;
-use App\Http\Resources\ClassEnrollmentResource\ClassEnrollmentResource;
 use App\Http\Resources\StudentEnrollmentResource\StudentEnrollmentResource;
 use App\Http\Resources\UserResource\UserResource;
 use Illuminate\Http\Request;
@@ -28,7 +27,6 @@ class StudentEnrollmentController extends Controller
         // $classes = StudentEnrollment::all();
 
         $classroomID = $request->query('classroomID');
-        $studentID = $request->query('userID');
 
         $isAvailable = $request->query('isAvailable');
         if ($isAvailable == true) {
@@ -39,14 +37,6 @@ class StudentEnrollmentController extends Controller
             $studentEnrollmentsQuery = DB::table('student_enrollments')
                 ->join('users', 'student_enrollments.user_id', '=', 'users.id')
                 ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id');
-
-            if (!empty($studentID)) {
-                $studentEnrollmentsQuery
-                    ->join('class_enrollments', 'classrooms.id', '=', 'class_enrollments.classroom_id')
-                    ->join('users as teachers', 'class_enrollments.user_id', '=', 'teachers.id')
-                    ->join('courses', 'class_enrollments.course_id', '=', 'courses.id')
-                    ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id');
-            }
 
             if (!empty($classroomID)) {
                 $studentEnrollmentsQuery->select(
@@ -78,47 +68,6 @@ class StudentEnrollmentController extends Controller
                 $studentEnrollmentsQuery->where('classroom_id', $classroomID);
             }
 
-            if (!empty($studentID)) {
-                $studentEnrollmentsQuery
-                    ->select(
-                        'student_enrollments.id as student_enrollments_id',
-                        'student_enrollments.classroom_id as student_enrollments_classroom_id',
-                        'student_enrollments.user_id as as student_enrollments_user_id',
-
-                        // 'users.id as user_id',
-                        // 'users.name as user_name',
-                        // 'users.username as user_username',
-                        // 'users.role as user_role',
-                        // 'users.avatar as user_avatar',
-
-                        // 'classrooms.id as classroom_id',
-                        'classrooms.name as classroom_name',
-                        'classrooms.grade as classroom_grade',
-
-                        'class_enrollments.id as id',
-                        'class_enrollments.classroom_id as classroom_id',
-                        'class_enrollments.course_id as course_id',
-
-                        'teachers.id as user_id',
-                        'teachers.name as user_name',
-                        'teachers.username as user_username',
-                        'teachers.role as user_role',
-                        'teachers.avatar as user_avatar',
-
-                        // 'courses.id as course_id',
-                        'courses.name as course_name',
-                        'courses.grade as course_grade',
-                        'courses.user_id as course_user_id',
-
-                        'pic_courses.id as pic_course_id',
-                        'pic_courses.name as pic_course_name',
-                        'pic_courses.username as pic_course_username',
-                        'pic_courses.role as pic_course_role',
-                        'pic_courses.avatar as pic_course_avatar',
-                    )
-                    ->where('student_enrollments.user_id', $studentID);
-            }
-
             $studentEnrollments = $studentEnrollmentsQuery->get();
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
@@ -138,14 +87,6 @@ class StudentEnrollmentController extends Controller
             return $this->apiResponse->successResponse(
                 message: $message,
                 data: UserResource::collection($studentEnrollments),
-                codeResponse: 200
-            );
-        }
-
-        if (!empty($studentID)) {
-            return $this->apiResponse->successResponse(
-                message: "List of class enrollments associated with the student retrieved successfully.",
-                data: ClassEnrollmentResource::collection($studentEnrollments),
                 codeResponse: 200
             );
         }
@@ -232,21 +173,62 @@ class StudentEnrollmentController extends Controller
     //     }
     // }
 
-    // CHANGE: move to index() with query parameter userID
     // note: student terdaftar di kelas mana aja
-    // public function studentClassroom(Request $request)
-    // {
-    //     //get users
-    //     // $users = DB::table('student_enrollments')->where('user_id', $request->user_id)->get();
-    //     $users = StudentEnrollment::where('user_id', $request->user_id)->first();
+    public function studentClassroom($studentID)
+    {
+        //get users
+        // $users = DB::table('student_enrollments')->where('user_id', $request->user_id)->get();
+        // $users = StudentEnrollment::where('user_id', $request->user_id)->first();
 
-    //     if ($users == "[]") {
-    //         return new StudentEnrollmentResource(false, 'No Students found', $users);
-    //     } else {
-    //         //return collection of users as a resource
-    //         return new StudentEnrollmentResource(true, 'Students Class', $users->classroom_id);
-    //     }
-    // }
+        try {
+            $studentEnrollment = DB::table('student_enrollments')
+                ->join('users', 'student_enrollments.user_id', '=', 'users.id')
+                ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
+                ->select(
+                    'student_enrollments.id as id',
+                    'student_enrollments.classroom_id',
+                    'student_enrollments.user_id',
+
+                    'users.id as user_id',
+                    'users.name as user_name',
+                    'users.username as user_username',
+                    'users.role as user_role',
+                    'users.avatar as user_avatar',
+
+                    'classrooms.id as classroom_id',
+                    'classrooms.name as classroom_name',
+                    'classrooms.grade as classroom_grade'
+                )
+                ->where('student_enrollments.user_id', $studentID)
+                ->first();
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: 'An error occurred while fetching student enrollments',
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+        if ($studentEnrollment == null) {
+            return $this->apiResponse->errorResponse(
+                message: 'Student Enrollment not found.',
+                errors: ['Student Enrollment not found'],
+                codeResponse: 404
+            );
+        }
+
+        // if ($users == "[]") {
+        //     return new StudentEnrollmentResource(false, 'No Students found', $users);
+        // } else {
+        //     //return collection of users as a resource
+        //     return new StudentEnrollmentResource(true, 'Students Class', $users->classroom_id);
+        // }
+        return $this->apiResponse->successResponse(
+            message: 'Student Enrollment in classroom retrieved successfully.',
+            data: new StudentEnrollmentResource($studentEnrollment),
+            codeResponse: 200
+        );
+    }
 
     // CHANGE: move to use index() with query parameter classroomID and isAvailable
     // public function getStudentsByClassroom(Request $request, $id)

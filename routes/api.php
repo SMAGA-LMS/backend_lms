@@ -36,12 +36,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/classrooms', ClassroomController::class);
 
     Route::apiResource('/student-enrollments', StudentEnrollmentController::class);
+    Route::get('/student-enrollments/student/{studentID}/classroom', [StudentEnrollmentController::class, 'studentClassroom']);
 
     Route::apiResource('/courses', CourseController::class);
     Route::put('/courses/{course}/teachers', [CourseController::class, 'assignTeacherToCourse']);
 
     Route::apiResource('/class-enrollments', ClassEnrollmentController::class);
-    Route::put('/class-enrollments/{class_enrollments}/teachers', [ClassEnrollmentController::class, 'assignTeacherToClassEnrollment']);
+    Route::put('/class-enrollments/{class_enrollment}/teachers', [ClassEnrollmentController::class, 'assignTeacherToClassEnrollment']);
 
     Route::apiResource('/modules', ModuleController::class);
 
@@ -62,7 +63,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 // CHANGE: refactor menggunakan prefix (mirip di-grouping)
 // reason: biar ga perlu nulis /users/login, /users/..., cukup /login
 Route::prefix('auth')->group(function () {
-    Route::post('/login', [AuthenticationController::class, 'login']);
+    Route::post('/login', [AuthenticationController::class, 'login'])->name('auth.login');
     Route::post('/logout', [AuthenticationController::class, 'logout'])->middleware(['auth:sanctum']);
     Route::get('/me', [AuthenticationController::class, 'authMe'])->middleware(['auth:sanctum']);
 });

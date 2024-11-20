@@ -30,6 +30,7 @@ class ClassEnrollmentController extends Controller
         // $courses = ClassEnrollment::all();
 
         $teacherID = $request->query('userID');
+        $classroomID = $request->query('classroomID');
         try {
             $classEnrollmentsQuery = DB::table('class_enrollments')
                 ->leftJoin('classrooms', 'class_enrollments.classroom_id', '=', 'classrooms.id')
@@ -66,6 +67,10 @@ class ClassEnrollmentController extends Controller
             // get class enrollments by teacher ID
             if (!empty($teacherID)) {
                 $classEnrollmentsQuery->where('class_enrollments.user_id', $teacherID);
+            }
+
+            if (!empty($classroomID)) {
+                $classEnrollmentsQuery->where('class_enrollments.classroom_id', $classroomID);
             }
 
             $classEnrollments = $classEnrollmentsQuery->get();
@@ -174,17 +179,18 @@ class ClassEnrollmentController extends Controller
         }
     }
 
-    public function getClassesCourseID(Request $request)
-    {
-        $courses = DB::table('class_enrollments')->where('classroom_id', $request->classroom_id)->get();
+    // CHANGE: move to index() method, use query param classroomID
+    // public function getClassesCourseID(Request $request)
+    // {
+    //     $courses = DB::table('class_enrollments')->where('classroom_id', $request->classroom_id)->get();
 
-        if ($courses == "[]") {
-            return new ClassEnrollmentResource(false, 'No Classes found', $courses);
-        } else {
-            //return collection of classes as a resource
-            return new ClassEnrollmentResource(true, 'List Courses in a Class', $courses);
-        }
-    }
+    //     if ($courses == "[]") {
+    //         return new ClassEnrollmentResource(false, 'No Classes found', $courses);
+    //     } else {
+    //         //return collection of classes as a resource
+    //         return new ClassEnrollmentResource(true, 'List Courses in a Class', $courses);
+    //     }
+    // }
 
     public function store(AddNewClassEnrollmentRequest $request)
     {
