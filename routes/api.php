@@ -35,7 +35,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // jadi end point nya classrooms aja
     Route::apiResource('/classrooms', ClassroomController::class);
 
-    Route::get('/classrooms/{classroom}/students', [StudentEnrollmentController::class, 'getStudentsByClassroom']);
     Route::apiResource('/student-enrollments', StudentEnrollmentController::class);
 
     Route::apiResource('/courses', CourseController::class);

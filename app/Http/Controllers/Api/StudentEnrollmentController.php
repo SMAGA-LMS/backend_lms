@@ -21,16 +21,34 @@ class StudentEnrollmentController extends Controller
         $this->apiResponse = $apiResponse;
     }
 
-    public function index()
+    public function index(Request $request)
     {
         // //get class
         // $classes = StudentEnrollment::all();
 
+        $classroomID = $request->query('classroomID');
+        $isAvailable = $request->query('isAvailable');
+
+        $isAvailable = $request->query('isAvailable');
+        if ($isAvailable == true) {
+            return $this->getAvailableStudents($classroomID);
+        }
+
         try {
-            $studentEnrollments = DB::table('student_enrollments')
+            $studentEnrollmentsQuery = DB::table('student_enrollments')
                 ->join('users', 'student_enrollments.user_id', '=', 'users.id')
-                ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
-                ->select(
+                ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id');
+
+            if (!empty($classroomID)) {
+                $studentEnrollmentsQuery->select(
+                    'users.id as id',
+                    'users.name as name',
+                    'users.username as username',
+                    'users.role as role',
+                    'users.avatar as avatar'
+                );
+            } else {
+                $studentEnrollmentsQuery->select(
                     'student_enrollments.id as id',
                     'student_enrollments.classroom_id',
                     'student_enrollments.user_id',
@@ -44,8 +62,14 @@ class StudentEnrollmentController extends Controller
                     'classrooms.id as classroom_id',
                     'classrooms.name as classroom_name',
                     'classrooms.grade as classroom_grade'
-                )
-                ->get();
+                );
+            }
+
+            if (!empty($classroomID)) {
+                $studentEnrollmentsQuery->where('classroom_id', $classroomID);
+            }
+
+            $studentEnrollments = $studentEnrollmentsQuery->get();
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: 'An error occurred while fetching student enrollments',
@@ -54,11 +78,21 @@ class StudentEnrollmentController extends Controller
             );
         }
 
-        $message = "List of users retrieved successfully.";
-        if (empty($studentEnrollments)) $message = "No users found.";
+        $message = "List of student enrollments retrieved successfully.";
+        if (empty($studentEnrollments)) $message = "No student enrollments found.";
 
         // //return collection of users as a resource
         // return new StudentEnrollmentResource(true, 'List Data Student-Class', $classes);
+        // if classroomID exists, return UserResource
+        if (!empty($classroomID)) {
+            return $this->apiResponse->successResponse(
+                message: $message,
+                data: UserResource::collection($studentEnrollments),
+                codeResponse: 200
+            );
+        }
+
+        // otherwise (classroomID not exists from query param), return StudentEnrollmentResource
         return $this->apiResponse->successResponse(
             message: $message,
             data: StudentEnrollmentResource::collection($studentEnrollments),
@@ -155,66 +189,67 @@ class StudentEnrollmentController extends Controller
         }
     }
 
-    public function getStudentsByClassroom(Request $request, $id)
-    {
-        if (!is_numeric($id) || intval($id) != $id) {
-            return $this->apiResponse->errorResponse(
-                message: "Invalid Classroom ID.",
-                errors: ['Invalid Classroom ID'],
-                codeResponse: 400
-            );
-        }
+    // CHANGE: move to use index() with query parameter classroomID and isAvailable
+    // public function getStudentsByClassroom(Request $request, $id)
+    // {
+    //     if (!is_numeric($id) || intval($id) != $id) {
+    //         return $this->apiResponse->errorResponse(
+    //             message: "Invalid Classroom ID.",
+    //             errors: ['Invalid Classroom ID'],
+    //             codeResponse: 400
+    //         );
+    //     }
 
-        $classroom = DB::table('classrooms')->where('id', intval($id))->first();
-        if ($classroom == null) {
-            return $this->apiResponse->errorResponse(
-                message: "Classroom not found.",
-                errors: ['Classroom not found'],
-                codeResponse: 404
-            );
-        }
+    //     $classroom = DB::table('classrooms')->where('id', intval($id))->first();
+    //     if ($classroom == null) {
+    //         return $this->apiResponse->errorResponse(
+    //             message: "Classroom not found.",
+    //             errors: ['Classroom not found'],
+    //             codeResponse: 404
+    //         );
+    //     }
 
-        $isAvailable = $request->query('isAvailable');
-        if ($isAvailable == true) {
-            return $this->getAvailableStudents($id);
-        }
+    //     $isAvailable = $request->query('isAvailable');
+    //     if ($isAvailable == true) {
+    //         return $this->getAvailableStudents($id);
+    //     }
 
-        $students = DB::table('student_enrollments')
-            ->join('users', 'student_enrollments.user_id', '=', 'users.id')
-            ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
-            ->select(
-                'users.id as id',
-                'users.name as name',
-                'users.username as username',
-                'users.role as role',
-                'users.avatar as avatar'
-            )
-            ->where('student_enrollments.classroom_id', $id)
-            ->get();
-        // ->map(function ($student) {
-        //     return (object) [
-        //         'id' => $student->user_id,
-        //         'name' => $student->user_name,
-        //         'username' => $student->user_username,
-        //         'role' => $student->user_role,
-        //         'avatar' => $student->user_avatar,
-        //     ];
-        // });
+    //     $students = DB::table('student_enrollments')
+    //         ->join('users', 'student_enrollments.user_id', '=', 'users.id')
+    //         ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
+    //         ->select(
+    //             'users.id as id',
+    //             'users.name as name',
+    //             'users.username as username',
+    //             'users.role as role',
+    //             'users.avatar as avatar'
+    //         )
+    //         ->where('student_enrollments.classroom_id', $id)
+    //         ->get();
+    //     // ->map(function ($student) {
+    //     //     return (object) [
+    //     //         'id' => $student->user_id,
+    //     //         'name' => $student->user_name,
+    //     //         'username' => $student->user_username,
+    //     //         'role' => $student->user_role,
+    //     //         'avatar' => $student->user_avatar,
+    //     //     ];
+    //     // });
 
-        if ($students->isEmpty()) {
-            return $this->apiResponse->successResponse(
-                message: "No student found in classroom " . $classroom->name,
-                data: [],
-                codeResponse: 200
-            );
-        }
+    //     if ($students->isEmpty()) {
+    //         return $this->apiResponse->successResponse(
+    //             message: "No student found in classroom " . $classroom->name,
+    //             data: [],
+    //             codeResponse: 200
+    //         );
+    //     }
 
-        return $this->apiResponse->successResponse(
-            message: "List of students in classroom " . $classroom->name . " retrieved successfully.",
-            data: UserResource::collection($students),
-            codeResponse: 200
-        );
-    }
+    //     return $this->apiResponse->successResponse(
+    //         message: "List of students in classroom " . $classroom->name . " retrieved successfully.",
+    //         data: UserResource::collection($students),
+    //         codeResponse: 200
+    //     );
+    // }
 
     // note: dapetin list student yang belum terdaftar di kelas tersebut (classroomID), biar ga duplicate student yang sama di kelas yang sama
     public function getAvailableStudents($classroomID)
