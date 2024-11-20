@@ -58,15 +58,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
 // Route::apiResource('/modules', App\Http\Controllers\Api\ModuleController::class);
 // Route::apiResource('/readmodules', App\Http\Controllers\Api\ReadModuleController::class);
 // Route::apiResource('/requirements', App\Http\Controllers\Api\RequirementController::class);
-Route::apiResource('/users', App\Http\Controllers\Api\UserController::class);
-Route::apiResource('/classes', App\Http\Controllers\Api\ClassroomController::class);
-Route::apiResource('/studentenrollment', App\Http\Controllers\Api\StudentEnrollmentController::class);
-Route::apiResource('/courses', App\Http\Controllers\Api\CourseController::class);
-Route::apiResource('/classenrollment', App\Http\Controllers\Api\ClassEnrollmentController::class);
-Route::apiResource('/modules', App\Http\Controllers\Api\ModuleController::class);
-Route::apiResource('/readmodules', App\Http\Controllers\Api\ReadModuleController::class);
-Route::apiResource('/requirements', App\Http\Controllers\Api\RequirementController::class);
-Route::apiResource('/attendance', App\Http\Controllers\Api\AttendanceController::class);
 
 //user
 // CHANGE: refactor menggunakan prefix (mirip di-grouping)
@@ -105,7 +96,7 @@ Route::prefix('auth')->group(function () {
 //module
 
 //readmodule
-Route::post('/readmodules/find', [App\Http\Controllers\Api\ReadModuleController::class, 'find']);
+// Route::post('/readmodules/find', [App\Http\Controllers\Api\ReadModuleController::class, 'find']);
 
 //attendance
-Route::post('/attendance/student-ce_list', [App\Http\Controllers\Api\AttendanceController::class, 'student_ce']);
+// Route::post('/attendance/student-ce_list', [App\Http\Controllers\Api\AttendanceController::class, 'student_ce']);
