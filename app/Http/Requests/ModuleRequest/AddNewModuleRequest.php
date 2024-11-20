@@ -28,7 +28,7 @@ class AddNewModuleRequest extends FormRequest
             'name' => 'required',
             'description' => 'required',
             'file' => 'mimes:xlsx,doc,docx,ppt,pptx,pdf|nullable|max:2048',
-            'courseID' => 'required|exists:courses,id'
+            // 'courseID' => 'required|exists:courses,id'  // read database/migrations/2024_08_07_130656_create_modules_table.php
         ];
     }
 

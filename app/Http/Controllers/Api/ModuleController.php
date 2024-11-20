@@ -23,39 +23,41 @@ class ModuleController extends Controller
         $this->apiResponse = $apiResponse;
     }
 
-    public function index(Request $request)
+    public function index()
     {
-        $courseID = $request->query('courseID');
+        // $courseID = $request->query('courseID');
 
         //get modules
-        // $modules = Module::all();
         try {
-            $modulesQuery = DB::table('modules')
-                ->join('courses', 'modules.course_id', '=', 'courses.id')
-                ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
-                ->select(
-                    'modules.id',
-                    'modules.name',
-                    'modules.description',
-                    'modules.file',
+            $modules = Module::all();
 
-                    'courses.id as course_id',
-                    'courses.name as course_name',
-                    'courses.user_id as course_user_id',
-                    'courses.grade as course_grade',
+            // read database/migrations/2024_08_07_130656_create_modules_table.php
+            // $modulesQuery = DB::table('modules')
+            // ->join('courses', 'modules.course_id', '=', 'courses.id')
+            // ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
+            // ->select(
+            //     'modules.id',
+            //     'modules.name',
+            //     'modules.description',
+            //     'modules.file',
 
-                    'pic_courses.id as pic_course_id',
-                    'pic_courses.name as pic_course_name',
-                    'pic_courses.username as pic_course_username',
-                    'pic_courses.role as pic_course_role',
-                    'pic_courses.avatar as pic_course_avatar',
-                );
+            //     'courses.id as course_id',
+            //     'courses.name as course_name',
+            //     'courses.user_id as course_user_id',
+            //     'courses.grade as course_grade',
 
-            if (!empty($courseID)) {
-                $modulesQuery->where('course_id', $courseID);
-            }
+            //     'pic_courses.id as pic_course_id',
+            //     'pic_courses.name as pic_course_name',
+            //     'pic_courses.username as pic_course_username',
+            //     'pic_courses.role as pic_course_role',
+            //     'pic_courses.avatar as pic_course_avatar',
+            // );
 
-            $modules = $modulesQuery->get();
+            // if (!empty($courseID)) {
+            //     $modulesQuery->where('course_id', $courseID);
+            // }
+
+            // $modules = $modulesQuery->get();
         } catch (\Exception $e) {
             return $this->apiResponse->errorResponse(
                 message: "Failed to retrieve modules",
@@ -108,7 +110,7 @@ class ModuleController extends Controller
             'name'     => $validatedRequest['name'],
             'description'   => $validatedRequest['description'],
             'file'     => $moduleDb,
-            'course_id' => $validatedRequest['courseID']
+            // 'course_id' => $validatedRequest['courseID'] // read database/migrations/2024_08_07_130656_create_modules_table.php
         ]);
 
         // return new ModuleResource(true, 'New Module added', $modules);
@@ -130,30 +132,32 @@ class ModuleController extends Controller
         }
 
         //find post by ID
-        // $module = Module::find($id);
         try {
-            $module = DB::table('modules')
-                ->join('courses', 'modules.course_id', '=', 'courses.id')
-                ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
-                ->select(
-                    'modules.id',
-                    'modules.name',
-                    'modules.description',
-                    'modules.file',
+            $module = Module::find($id);
 
-                    'courses.id as course_id',
-                    'courses.name as course_name',
-                    'courses.user_id as course_user_id',
-                    'courses.grade as course_grade',
+            // read database/migrations/2024_08_07_130656_create_modules_table.php
+            // $module = DB::table('modules')
+            //     ->join('courses', 'modules.course_id', '=', 'courses.id')
+            //     ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
+            //     ->select(
+            //         'modules.id',
+            //         'modules.name',
+            //         'modules.description',
+            //         'modules.file',
 
-                    'pic_courses.id as pic_course_id',
-                    'pic_courses.name as pic_course_name',
-                    'pic_courses.username as pic_course_username',
-                    'pic_courses.role as pic_course_role',
-                    'pic_courses.avatar as pic_course_avatar',
-                )
-                ->where('modules.id', $id)
-                ->first();
+            //         'courses.id as course_id',
+            //         'courses.name as course_name',
+            //         'courses.user_id as course_user_id',
+            //         'courses.grade as course_grade',
+
+            //         'pic_courses.id as pic_course_id',
+            //         'pic_courses.name as pic_course_name',
+            //         'pic_courses.username as pic_course_username',
+            //         'pic_courses.role as pic_course_role',
+            //         'pic_courses.avatar as pic_course_avatar',
+            //     )
+            //     ->where('modules.id', $id)
+            //     ->first();
         } catch (\Exception $e) {
             return $this->apiResponse->errorResponse(
                 message: "Failed to retrieve module",
@@ -163,7 +167,15 @@ class ModuleController extends Controller
         }
 
         $message = "Module retrieved successfully.";
-        if (empty($module)) $message = "No module found.";
+        if (empty($module)) $message = "Module not found.";
+
+        if ($module == null) {
+            return $this->apiResponse->errorResponse(
+                message: $message,
+                errors: [$message],
+                codeResponse: 404
+            );
+        }
 
         //return single post as a resource
         // if ($module == null) {

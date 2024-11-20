@@ -15,6 +15,6 @@ class Module extends Model
         'name',
         'description',
         'file',
-        'course_id',
+        // 'course_id',  // read database/migrations/2024_08_07_130656_create_modules_table.php
     ];
 }
