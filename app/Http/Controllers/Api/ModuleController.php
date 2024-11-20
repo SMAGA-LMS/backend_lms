@@ -2,62 +2,121 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ModuleRequest\AddNewModuleRequest;
+use App\Http\Resources\ModuleResource\ModuleResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Module;
-use App\Http\Resources\ModuleResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
 
 class ModuleController extends Controller
 {
-    public function index()
-    {
-        //get modules
-        $modules = Module::all();
+    protected $apiResponse;
 
-        //return collection of modules as a resource
-        return new ModuleResource(true, 'List of Modules', $modules);
+    public function __construct(ApiResponseHelper $apiResponse)
+    {
+        $this->apiResponse = $apiResponse;
     }
 
-    public function store(Request $request)
+    public function index(Request $request)
     {
-        //define validation rules
-        $validator = Validator::make($request->all(), [
-            'name'      => 'required',
-            'description'      => 'required',
-            'file'     => 'mimes:xlsx,doc,docx,ppt,pptx,pdf',
-        ]);
+        $courseID = $request->query('courseID');
 
-        //check if validation fails
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        //get modules
+        // $modules = Module::all();
+        try {
+            $modulesQuery = DB::table('modules')
+                ->join('courses', 'modules.course_id', '=', 'courses.id')
+                ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
+                ->select(
+                    'modules.id',
+                    'modules.name',
+                    'modules.description',
+                    'modules.file',
+
+                    'courses.id as course_id',
+                    'courses.name as course_name',
+                    'courses.user_id as course_user_id',
+                    'courses.grade as course_grade',
+
+                    'pic_courses.id as pic_course_id',
+                    'pic_courses.name as pic_course_name',
+                    'pic_courses.username as pic_course_username',
+                    'pic_courses.role as pic_course_role',
+                    'pic_courses.avatar as pic_course_avatar',
+                );
+
+            if (!empty($courseID)) {
+                $modulesQuery->where('course_id', $courseID);
+            }
+
+            $modules = $modulesQuery->get();
+        } catch (\Exception $e) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve modules",
+                errors: $e->getMessage(),
+                codeResponse: 500
+            );
         }
 
+        $message = "List of Modules";
+        if ($modules->isEmpty()) $message = "Modules not found";
+
+        //return collection of modules as a resource
+        // return new ModuleResource(true, 'List of Modules', $modules);
+        return $this->apiResponse->successResponse(
+            message: $message,
+            data: ModuleResource::collection($modules),
+            codeResponse: 200
+        );
+    }
+
+    public function store(AddNewModuleRequest $request)
+    {
+        // CHANGE: move to AddNewModuleRequest
+        // //define validation rules
+        // $validator = Validator::make($request->all(), [
+        //     'name'      => 'required',
+        //     'description'      => 'required',
+        //     'file'     => 'mimes:xlsx,doc,docx,ppt,pptx,pdf',
+        // ]);
+
+        // //check if validation fails
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
+
+        $validatedRequest = $request->validated();
+
         //upload image
-        if($request->hasFile('file')){
+        if ($request->hasFile('file')) {
             $modulefile = $request->file('file');
             $modulefile->storeAs('public/Modules', $modulefile->hashName());
             $moduleDb = $modulefile->hashName();
-        }
-        else{
-            $moduleDb = "null";
+        } else {
+            $moduleDb = null;
         }
 
 
         //create module
-        $modules = Module::create([
-            'name'     => $request->name,
-            'description'   => $request->description,
+        $module = Module::create([
+            'name'     => $validatedRequest['name'],
+            'description'   => $validatedRequest['description'],
             'file'     => $moduleDb,
-            'course_id' => $request->course_id
+            'course_id' => $validatedRequest['courseID']
         ]);
 
-
-        return new ModuleResource(true, 'New Module added', $modules);
+        // return new ModuleResource(true, 'New Module added', $modules);
+        return $this->apiResponse->successResponse(
+            message: "New Module added",
+            data: new ModuleResource($module),
+            codeResponse: 201
+        );
     }
 
     public function show($id)
@@ -66,13 +125,11 @@ class ModuleController extends Controller
         $module = Module::find($id);
 
         //return single post as a resource
-        if($module==null){
+        if ($module == null) {
             return new ModuleResource(false, 'Module not found', $module);
-        }
-        else{
+        } else {
             return new ModuleResource(true, 'Detail module', $module);
         }
-
     }
 
     public function update(Request $request, $id)
@@ -90,14 +147,13 @@ class ModuleController extends Controller
 
         $module = Module::find($id);
 
-        if(!empty($module)){
+        if (!empty($module)) {
             //upload image
-            if($request->hasFile('file')){
+            if ($request->hasFile('file')) {
                 $modulefile = $request->file('file');
                 $modulefile->storeAs('public/Modules', $modulefile->hashName());
                 $moduleDb = $modulefile->hashName();
-            }
-            else{
+            } else {
                 $moduleDb = "null";
             }
             $request->merge(['file' => $moduleDb]);
@@ -108,12 +164,10 @@ class ModuleController extends Controller
                 'file' => $moduleDb,
                 'course_id' => $request->course_id
             ]);
-        }
-        elseif(empty($module)){
+        } elseif (empty($module)) {
             return new ModuleResource(false, 'Module Not Found', $module);
         }
 
         return new ModuleResource(true, 'Updated Module', $module);
-
     }
 }
