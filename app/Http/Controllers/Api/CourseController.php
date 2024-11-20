@@ -31,7 +31,7 @@ class CourseController extends Controller
     {
         //get courses
         $courses = DB::table('courses')
-            ->join('users', 'courses.user_id', '=', 'users.id')
+            ->leftJoin('users', 'courses.user_id', '=', 'users.id')
             ->select(
                 'courses.id',
                 'courses.name',
@@ -70,7 +70,7 @@ class CourseController extends Controller
 
         //find course by ID
         $course = DB::table('courses')
-            ->join('users', 'courses.user_id', '=', 'users.id')
+            ->leftJoin('users', 'courses.user_id', '=', 'users.id')
             ->select(
                 'courses.id',
                 'courses.name',
