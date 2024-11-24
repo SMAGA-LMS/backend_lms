@@ -24,9 +24,7 @@ class CourseModuleController extends Controller
         $this->moduleController = $moduleController;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
+    // LMS-109
     public function index(Request $request)
     {
         $courseID = $request->query('courseID');
@@ -82,9 +80,7 @@ class CourseModuleController extends Controller
         );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // LMS-107
     public function store(AddNewCourseModuleRequest $request)
     {
         $validatedRequest = $request->validated();

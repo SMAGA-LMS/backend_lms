@@ -24,6 +24,7 @@ class ClassEnrollmentController extends Controller
         $this->apiResponse = $apiResponse;
     }
 
+    // LMS-15, LMS-99, LMS-94, LMS-121
     public function index(Request $request)
     {
         //get class
@@ -94,6 +95,7 @@ class ClassEnrollmentController extends Controller
         );
     }
 
+    // LMS-17, LMS-101
     public function show($id)
     {
         if (!is_numeric($id) || intval($id) != $id) {
@@ -139,8 +141,8 @@ class ClassEnrollmentController extends Controller
             ->where('class_enrollments.id', $id)
             ->first();
 
-        $message = "Course data retrieved successfully.";
-        if (empty($classEnrollment)) $message = "Course not found.";
+        $message = "Class enrollments data retrieved successfully.";
+        if (empty($classEnrollment)) $message = "Class enrollment not found.";
 
         //return single post as a resource
         // if ($classenr == null) {
@@ -155,6 +157,7 @@ class ClassEnrollmentController extends Controller
         );
     }
 
+    // LMS-16
     public function getCoursesClassID(Request $request)
     {
         $classes = DB::table('class_enrollments')->where('course_id', $request->course_id)->get()->first();
@@ -167,6 +170,7 @@ class ClassEnrollmentController extends Controller
         }
     }
 
+    // LMS-16
     public function getCoursesClassIDList(Request $request)
     {
         $classes = DB::table('class_enrollments')->where('course_id', $request->course_id)->get();
@@ -179,6 +183,7 @@ class ClassEnrollmentController extends Controller
         }
     }
 
+    // LMS-20 => move to [LMS-121]
     // CHANGE: move to index() method, use query param classroomID
     // public function getClassesCourseID(Request $request)
     // {
@@ -192,6 +197,7 @@ class ClassEnrollmentController extends Controller
     //     }
     // }
 
+    // LMS-14, LMS-97
     public function store(AddNewClassEnrollmentRequest $request)
     {
         // CHANGE: move validation to AddNewClassEnrollmentRequest
@@ -234,7 +240,8 @@ class ClassEnrollmentController extends Controller
         );
     }
 
-    public function assignTeacherToClassEnrollment(AssignNewTeacherRequest $request, $id)
+    // LMS-103
+    public function update(AssignNewTeacherRequest $request, $id)
     {
         if (!is_numeric($id) || intval($id) != $id) {
             return $this->apiResponse->errorResponse(

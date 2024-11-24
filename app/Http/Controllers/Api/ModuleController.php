@@ -23,6 +23,7 @@ class ModuleController extends Controller
         $this->apiResponse = $apiResponse;
     }
 
+    // LMS-22
     public function index()
     {
         // $courseID = $request->query('courseID');
@@ -78,6 +79,7 @@ class ModuleController extends Controller
         );
     }
 
+    // LMS-21, LMS-114
     public function store(AddNewModuleRequest $request)
     {
         // CHANGE: move to AddNewModuleRequest
@@ -104,6 +106,7 @@ class ModuleController extends Controller
         );
     }
 
+    // bagian dari LMS-21
     public function createNewModule($validatedRequest, $request)
     {
         //upload image
@@ -124,6 +127,7 @@ class ModuleController extends Controller
         ]);
     }
 
+    // LMS-115
     public function show($id)
     {
         if (!is_numeric($id) || intval($id) != $id) {
@@ -193,6 +197,7 @@ class ModuleController extends Controller
         );
     }
 
+    // LMS-23
     public function update(Request $request, $id)
     {
         $validator = Validator::make($request->all(), [

@@ -40,16 +40,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/student-enrollments/student/{studentID}/classroom', [StudentEnrollmentController::class, 'studentClassroom']);
 
     Route::apiResource('/courses', CourseController::class);
-    Route::put('/courses/{course}/teachers', [CourseController::class, 'assignTeacherToCourse']);
 
     Route::apiResource('/class-enrollments', ClassEnrollmentController::class);
-    Route::put('/class-enrollments/{class_enrollment}/teachers', [ClassEnrollmentController::class, 'assignTeacherToClassEnrollment']);
 
     Route::apiResource('/modules', ModuleController::class);
 
     Route::apiResource('/course-modules', CourseModuleController::class);
 
-    Route::apiResource('/attendances', AttendanceController::class);
+    // Route::apiResource('/attendances', AttendanceController::class);
 
     // ini get sebener nya
     // Route::post('/attendance/student-ce_list', [AttendanceController::class, 'student_ce']);

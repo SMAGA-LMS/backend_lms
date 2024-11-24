@@ -25,7 +25,7 @@ class ClassroomController extends Controller
         $this->apiResponse = $apiResponse;
     }
 
-    //
+    // LMS-73
     public function index()
     {
         //get class
@@ -54,6 +54,7 @@ class ClassroomController extends Controller
         // return new ClassroomResource(true, 'List Data Kelas', $classes);
     }
 
+    // LMS-85
     public function show($id)
     {
         if (!is_numeric($id)) {
@@ -97,6 +98,7 @@ class ClassroomController extends Controller
         );
     }
 
+    // LMS-72
     public function store(AddNewClassroomRequest $request)
     {
         // CHANGE: pindah ke ClassroomRequest\AddNewClassroomRequest

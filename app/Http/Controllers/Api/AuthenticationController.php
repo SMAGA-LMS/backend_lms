@@ -24,6 +24,7 @@ class AuthenticationController extends Controller
         $this->apiResponse = $apiResponse;
     }
 
+    // LMS-71
     public function login(LoginRequest $request)
     {
         $deviceName = $request->input('deviceName');
@@ -85,6 +86,7 @@ class AuthenticationController extends Controller
         // }
     }
 
+    // bagian dari LMS-71
     private function validateUserCredentials($credentials): ResponseDto
     {
         if (!Auth::attempt($credentials)) {
@@ -108,11 +110,13 @@ class AuthenticationController extends Controller
         );
     }
 
+    // bagian dari LMS-71
     private function generateToken(User $user, $deviceName)
     {
         return $user->createToken($deviceName)->plainTextToken;
     }
 
+    // LMS-64
     public function logout(Request $request)
     {
         $user = $request->user();
@@ -134,6 +138,7 @@ class AuthenticationController extends Controller
         );
     }
 
+    // bagian dari LMS-64
     private function deleteCurrentToken($user): ResponseDto
     {
         $currentToken = $user->currentAccessToken();
@@ -172,6 +177,7 @@ class AuthenticationController extends Controller
         );
     }
 
+    // LMS-66
     public function authMe(Request $request)
     {
         try {

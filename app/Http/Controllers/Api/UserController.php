@@ -25,6 +25,7 @@ class UserController extends Controller
         $this->apiResponse = $apiResponse;
     }
 
+    // LMS-69
     // pakai query param /users?role=RoleName
     public function index(Request $request)
     {
@@ -47,6 +48,7 @@ class UserController extends Controller
         // return new UserResource(true, 'List Data User', $users);
     }
 
+    // bagian dari LMS-69
     public function getAllUserList(): ResponseDto
     {
 
@@ -63,6 +65,7 @@ class UserController extends Controller
         );
     }
 
+    // bagian dari LMS-69
     public function getSpecificUserList(string $role): ResponseDto
     {
         if (empty($role)) {
@@ -93,6 +96,7 @@ class UserController extends Controller
         );
     }
 
+    // LMS-2, LMS-67
     public function store(AddNewUserRequest $request)
     {
         // CHANGE: pindah ke AddNewUserRequest
@@ -146,6 +150,7 @@ class UserController extends Controller
         );
     }
 
+    // bagian dari LMS-67
     private function generateUniqueUsername($baseUsername)
     {
         $username = $baseUsername;
@@ -159,6 +164,7 @@ class UserController extends Controller
         return $username;
     }
 
+    // LMS-49
     public function show($id)
     {
         //find post by ID
@@ -172,6 +178,7 @@ class UserController extends Controller
         }
     }
 
+    // LMS-19 => move to [LMS-71]
     public function login(Request $request)
     {
 
@@ -203,6 +210,7 @@ class UserController extends Controller
         }
     }
 
+    // LMS-11 => move to [LMS-69]
     // jadi pake yang method index aja, pembedanya dari query param
     // public function adminList()
     // {
@@ -213,6 +221,7 @@ class UserController extends Controller
     //     return new UserResource(true, 'List Data User', $users);
     // }
 
+    // LMS-11 => move to [LMS-69]
     // public function studentList()
     // {
     //     //get users
@@ -228,6 +237,7 @@ class UserController extends Controller
 
     // }
 
+    // LMS-11 => move to [LMS-69]
     // public function teacherList()
     // {
     //     //get users

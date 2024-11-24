@@ -26,7 +26,8 @@ class CourseController extends Controller
         $this->apiResponse = $apiResponse;
     }
 
-    //
+    // LMS-77, LMS-119
+    // // pakai query param /courses?userID=xxx
     public function index(Request $request)
     {
         $picCourseID = $request->query('userID');
@@ -73,6 +74,7 @@ class CourseController extends Controller
         // return new CourseResource(true, 'List Course', $courses);
     }
 
+    // LMS-81
     public function show($id)
     {
         if (!is_numeric($id) || intval($id) != $id) {
@@ -125,6 +127,7 @@ class CourseController extends Controller
         // }
     }
 
+    // LMS-33 => move to [LMS-119]
     // CHANGE: move to index() method, use query param userID
     // public function courseTeacherList(Request $request)
     // {
@@ -148,6 +151,7 @@ class CourseController extends Controller
     //     }
     // }
 
+    // LMS-12
     public function courseGradeList(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -170,6 +174,7 @@ class CourseController extends Controller
         }
     }
 
+    // LMS-76
     public function store(AddNewCourseRequest $request)
     {
         // pindah ke AddNewCourseRequest\AddNewCourseRequest untuk validasi
@@ -218,33 +223,23 @@ class CourseController extends Controller
         );
     }
 
-    // TODO: better dipisah business logic untuk update course dengan assign teacher
-    // logic yang kevin buat untuk assign teacher udah coba dipisahin di assignTeacher
-    public function update(Request $request, $id)
+    // LMS-84
+    public function update(AssignNewTeacherRequest $request, $id)
     {
-        //define validation rules
-        $validator = Validator::make($request->all(), [
-            'user_id' => 'required',
-        ]);
+        // CHANGE: move to AssignNewTeacherRequest
+        // //define validation rules
+        // $validator = Validator::make($request->all(), [
+        //     'user_id' => 'required',
+        // ]);
 
-        //check if validation fails
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
+        // //check if validation fails
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
 
-        $course = Course::find($id);
-        $course->update([
-            'user_id' => $request->user_id,
-        ]);
-
-        //return response
-        return new CourseResource(true, 'New Teacher added', $course);
-    }
-
-    public function assignTeacherToCourse(AssignNewTeacherRequest $request, $id)
-    {
         $validatedTeacher = $request->validated();
 
+        // $course = Course::find($id);
         try {
             $course = Course::find($id);
         } catch (\Throwable $th) {
@@ -255,6 +250,9 @@ class CourseController extends Controller
             );
         }
 
+        // $course->update([
+        //     'user_id' => $request->user_id,
+        // ]);
         $userID = $validatedTeacher['userID'] ?? null;
         if ($userID != null) {
             $userID = (int)$userID;
@@ -274,7 +272,7 @@ class CourseController extends Controller
             );
         }
 
-        //return response
+        // //return response
         // return new CourseResource(true, 'New Teacher added', $course);
         return $this->apiResponse->successResponse(
             message: "Teacher updated.",

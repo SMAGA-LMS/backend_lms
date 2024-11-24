@@ -21,6 +21,7 @@ class StudentEnrollmentController extends Controller
         $this->apiResponse = $apiResponse;
     }
 
+    // LMS-89, LMS-92
     public function index(Request $request)
     {
         // //get class
@@ -104,6 +105,7 @@ class StudentEnrollmentController extends Controller
         return null;
     }
 
+    // LMS-87
     public function store(AssignNewStudentRequest $request)
     {
         $validatedRequest = $request->validated();
@@ -159,7 +161,8 @@ class StudentEnrollmentController extends Controller
         );
     }
 
-    // CHANGE: move to getStudentsByClassroom()
+    // LMS-13 => move to [LMS-69]
+    // CHANGE: move to index() with query parameter classroomID
     // public function studentList(Request $request)
     // {
     //     //get users
@@ -173,6 +176,7 @@ class StudentEnrollmentController extends Controller
     //     }
     // }
 
+    // LMS-122
     // note: student terdaftar di kelas mana aja
     public function studentClassroom($studentID)
     {
@@ -230,68 +234,7 @@ class StudentEnrollmentController extends Controller
         );
     }
 
-    // CHANGE: move to use index() with query parameter classroomID and isAvailable
-    // public function getStudentsByClassroom(Request $request, $id)
-    // {
-    //     if (!is_numeric($id) || intval($id) != $id) {
-    //         return $this->apiResponse->errorResponse(
-    //             message: "Invalid Classroom ID.",
-    //             errors: ['Invalid Classroom ID'],
-    //             codeResponse: 400
-    //         );
-    //     }
-
-    //     $classroom = DB::table('classrooms')->where('id', intval($id))->first();
-    //     if ($classroom == null) {
-    //         return $this->apiResponse->errorResponse(
-    //             message: "Classroom not found.",
-    //             errors: ['Classroom not found'],
-    //             codeResponse: 404
-    //         );
-    //     }
-
-    //     $isAvailable = $request->query('isAvailable');
-    //     if ($isAvailable == true) {
-    //         return $this->getAvailableStudents($id);
-    //     }
-
-    //     $students = DB::table('student_enrollments')
-    //         ->join('users', 'student_enrollments.user_id', '=', 'users.id')
-    //         ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
-    //         ->select(
-    //             'users.id as id',
-    //             'users.name as name',
-    //             'users.username as username',
-    //             'users.role as role',
-    //             'users.avatar as avatar'
-    //         )
-    //         ->where('student_enrollments.classroom_id', $id)
-    //         ->get();
-    //     // ->map(function ($student) {
-    //     //     return (object) [
-    //     //         'id' => $student->user_id,
-    //     //         'name' => $student->user_name,
-    //     //         'username' => $student->user_username,
-    //     //         'role' => $student->user_role,
-    //     //         'avatar' => $student->user_avatar,
-    //     //     ];
-    //     // });
-
-    //     if ($students->isEmpty()) {
-    //         return $this->apiResponse->successResponse(
-    //             message: "No student found in classroom " . $classroom->name,
-    //             data: [],
-    //             codeResponse: 200
-    //         );
-    //     }
-
-    //     return $this->apiResponse->successResponse(
-    //         message: "List of students in classroom " . $classroom->name . " retrieved successfully.",
-    //         data: UserResource::collection($students),
-    //         codeResponse: 200
-    //     );
-    // }
-
+    // LMS-92
     // note: dapetin list student yang belum terdaftar di kelas tersebut (classroomID), biar ga duplicate student yang sama di kelas yang sama
     public function getAvailableStudents($classroomID)
     {
