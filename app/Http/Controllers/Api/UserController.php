@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\DataTransferObjects\ResponseDto;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest\AddNewUserRequest;
@@ -30,15 +29,15 @@ class UserController extends Controller
     public function index(Request $request)
     {
         $role = $request->query('role');
-        if (!isset($role) || $role === '') $result = $this->getAllUserList();
-        else $result = $this->getSpecificUserList($role);
+        if (!isset($role) || $role === '') return $this->getAllUserList();
+        else return $this->getSpecificUserList($role);
 
-        $users = $result->data;
-        return $this->apiResponse->successResponse(
-            message: $result->message,
-            data: UserResource::collection($users),
-            codeResponse: $result->codeResponse
-        );
+        // $users = $result->data;
+        // return $this->apiResponse->successResponse(
+        //     message: $result->message,
+        //     data: UserResource::collection($users),
+        //     codeResponse: $result->codeResponse
+        // );
 
         // CHANGE: pindah ke method getAllUserList()
         // //get users
@@ -49,7 +48,7 @@ class UserController extends Controller
     }
 
     // bagian dari LMS-69
-    public function getAllUserList(): ResponseDto
+    public function getAllUserList()
     {
 
         $users = User::all();
@@ -57,21 +56,19 @@ class UserController extends Controller
         $message = "List of users retrieved successfully.";
         if (empty($users)) $message = "No users found.";
 
-        return new ResponseDto(
-            isSuccess: true,
+        return $this->apiResponse->successResponse(
             message: $message,
-            data: $users,
+            data: UserResource::collection($users),
             codeResponse: 200
         );
     }
 
     // bagian dari LMS-69
-    public function getSpecificUserList(string $role): ResponseDto
+    public function getSpecificUserList(string $role)
     {
         if (empty($role)) {
-            return new ResponseDto(
-                isSuccess: true,
-                message: "No users found.",
+            return $this->apiResponse->successResponse(
+                message: "No " . $role . " found.",
                 data: [],
                 codeResponse: 200
             );
@@ -80,18 +77,16 @@ class UserController extends Controller
         $users = DB::table('users')->where('role', $role)->get();
 
         if ($users->isEmpty()) {
-            return new ResponseDto(
-                isSuccess: true,
+            return $this->apiResponse->successResponse(
                 message: "No " . $role . " found.",
                 data: [],
                 codeResponse: 200
             );
         }
 
-        return new ResponseDto(
-            isSuccess: true,
+        return $this->apiResponse->successResponse(
             message: "List of " . $users->first()->role . " retrieved successfully.",
-            data: $users,
+            data: UserResource::collection($users),
             codeResponse: 200
         );
     }

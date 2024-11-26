@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\DataTransferObjects\ResponseDto;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthenticationRequest\LoginRequest;
@@ -43,23 +42,28 @@ class AuthenticationController extends Controller
         //     return response()->json($validator->errors(), 422);
         // }
 
-        $result = $this->validateUserCredentials($credentials);
+        $user = $this->validateUserCredentials($credentials);
 
-        if (!$result->isSuccess) {
-            return $this->apiResponse->errorResponse(
-                message: $result->message,
-                errors: $result->errors,
-                codeResponse: $result->codeResponse
-            );
-        }
+        // if (!$result->isSuccess) {
+        //     return $this->apiResponse->errorResponse(
+        //         message: $result->message,
+        //         errors: $result->errors,
+        //         codeResponse: $result->codeResponse
+        //     );
+        // }
 
-        $user = $result->data;
+        // $user = $result->data;
         $token = $this->generateToken($user, $deviceName);
 
+        // return $this->apiResponse->successResponse(
+        //     message: $result->message,
+        //     data: new LoginResource($user, $token),
+        //     codeResponse: $result->codeResponse
+        // );
         return $this->apiResponse->successResponse(
-            message: $result->message,
+            message: "Success Login",
             data: new LoginResource($user, $token),
-            codeResponse: $result->codeResponse
+            codeResponse: 200
         );
 
         // if (!Auth::attempt($credentials)) {
@@ -87,27 +91,21 @@ class AuthenticationController extends Controller
     }
 
     // bagian dari LMS-71
-    private function validateUserCredentials($credentials): ResponseDto
+    private function validateUserCredentials($credentials)
     {
         if (!Auth::attempt($credentials)) {
-            return new ResponseDto(
-                isSuccess: false,
+            return $this->apiResponse->errorResponse(
                 message: "Authentication failed",
                 errors: [
                     'Username or password is incorrect'
                 ],
-                data: null,
                 codeResponse: 401
             );
         }
 
         $user = Auth::user();
-        return new ResponseDto(
-            isSuccess: true,
-            message: 'Success Login',
-            data: $user,
-            codeResponse: 200
-        );
+
+        return $user;
     }
 
     // bagian dari LMS-71
@@ -120,37 +118,20 @@ class AuthenticationController extends Controller
     public function logout(Request $request)
     {
         $user = $request->user();
-        $result = $this->deleteCurrentToken($user);
-
-        // jika gagal, bisa karena kegagalan pada database, dsb (check di AuthenticationService)
-        if (!$result->isSuccess) {
-            return $this->apiResponse->errorResponse(
-                message: $result->message,
-                errors: $result->errors,
-                codeResponse: $result->codeResponse
-            );
-        }
-
-        return $this->apiResponse->successResponse(
-            message: $result->message,
-            data: $result->data,
-            codeResponse: $result->codeResponse
-        );
+        return $this->deleteCurrentToken($user);
     }
 
     // bagian dari LMS-64
-    private function deleteCurrentToken($user): ResponseDto
+    private function deleteCurrentToken($user)
     {
         $currentToken = $user->currentAccessToken();
 
         if (!$currentToken) {
-            return new ResponseDto(
-                isSuccess: false,
+            return $this->apiResponse->errorResponse(
                 message: "Logout failed.",
                 errors: [
                     'Token not found.'
                 ],
-                data: null,
                 codeResponse: 401
             );
         }
@@ -158,19 +139,16 @@ class AuthenticationController extends Controller
         try {
             $currentToken->delete();
         } catch (Exception $e) {
-            return new ResponseDto(
-                isSuccess: false,
+            return $this->apiResponse->errorResponse(
                 message: "Failed to logout",
                 errors: [
                     "Database fail to delete the token."
                 ],
-                data: null,
                 codeResponse: 500
             );
         }
 
-        return new ResponseDto(
-            isSuccess: true,
+        return $this->apiResponse->successResponse(
             message: "Successfully Logout",
             data: [],
             codeResponse: 200
