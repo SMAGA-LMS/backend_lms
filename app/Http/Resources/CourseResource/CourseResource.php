@@ -17,19 +17,21 @@ class CourseResource extends JsonResource
     {
         $user = $this->user_id ? (object)[
             'id' => $this->user_id,
-            'name' => $this->user_name,
-            'username' => $this->user_username,
-            'role' => $this->user_role,
-            'avatar' => $this->user_avatar,
+            'name' => $this->user_name ?? null,
+            'username' => $this->user_username ?? null,
+            'role' => $this->user_role ?? null,
+            'avatar' => $this->user_avatar ?? null,
         ] : null;
 
         $dataResponse = [
             'id' => $this->id,
+
             'name' => $this->name,
             'grade' => $this->grade,
             'user' => $user ? new UserResource($user) : null,
-            // kalau pakai eloquent kayak di bawah ini
-            // 'user' => new UserResource($this->whenLoaded('user')),
+
+            'created_at' => $this->created_at ?? null,
+            'updated_at' => $this->updated_at ?? null,
         ];
 
         return $dataResponse;

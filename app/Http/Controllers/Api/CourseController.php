@@ -40,6 +40,8 @@ class CourseController extends Controller
                     'courses.id',
                     'courses.name',
                     'courses.grade',
+                    'courses.created_at',
+                    'courses.updated_at',
 
                     'users.id as user_id',
                     'users.name as user_name',

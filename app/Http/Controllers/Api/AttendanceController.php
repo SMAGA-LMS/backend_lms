@@ -61,10 +61,10 @@ class AttendanceController extends Controller
             $createdAttendances = [];
             foreach ($students['students'] as $items) {
                 // Simpan attendance berdasarkan studentID sebagai key
-                $createdAttendances[$items['studentID']] = Attendance::create([
-                    'student_id' => $items['studentID'],
-                    'classenrollment_id' => $items['classenrollmentID'],
-                    'date_time' => $items['dateTime'],
+                $createdAttendances[$items['student_id']] = Attendance::create([
+                    'student_id' => $items['student_id'],
+                    'classenrollment_id' => $items['classenrollment_id'],
+                    'date_time' => $items['date_time'],
                     'session' => $items['session'],
                 ]);
             }

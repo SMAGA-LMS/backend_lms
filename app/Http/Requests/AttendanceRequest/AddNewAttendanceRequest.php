@@ -26,9 +26,9 @@ class AddNewAttendanceRequest extends FormRequest
     {
         return [
             'students'     => 'required|array',
-            'students.*.studentID' => 'required|exists:users,id',
-            'students.*.classenrollmentID' => 'required|exists:class_enrollments,id',
-            'students.*.dateTime' => 'required|date',
+            'students.*.student_id' => 'required|exists:users,id',
+            'students.*.classenrollment_id' => 'required|exists:class_enrollments,id',
+            'students.*.date_time' => 'required|date',
             'students.*.session' => 'required|numeric',
         ];
     }

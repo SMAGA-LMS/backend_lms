@@ -18,27 +18,31 @@ class CourseModuleResource extends JsonResource
     {
         $course = $this->course_id ? (object)[
             'id' => $this->course_id,
-            'name' => $this->course_name,
-            'grade' => $this->course_grade,
+            'name' => $this->course_name ?? null,
+            'grade' => $this->course_grade ?? null,
 
-            'user_id' => $this->pic_course_id,
-            'user_name' => $this->pic_course_name,
-            'user_username' => $this->pic_course_username,
-            'user_role' => $this->pic_course_role,
-            'user_avatar' => $this->pic_course_avatar,
+            'user_id' => $this->pic_course_id ?? null,
+            'user_name' => $this->pic_course_name ?? null,
+            'user_username' => $this->pic_course_username ?? null,
+            'user_role' => $this->pic_course_role ?? null,
+            'user_avatar' => $this->pic_course_avatar ?? null,
         ] : null;
 
         $module = $this->module_id ? (object)[
             'id' => $this->module_id,
-            'name' => $this->module_name,
-            'description' => $this->module_description,
-            'file' => $this->module_file,
+            'name' => $this->module_name ?? null,
+            'description' => $this->module_description ?? null,
+            'file' => $this->module_file ?? null,
         ] : null;
 
         $dataResponse = [
             'id' => $this->id,
+
             'course' => $course ? new CourseResource($course) : null,
             'module' => $module ? new ModuleResource($module) : null,
+
+            'created_at' => $this->created_at ?? null,
+            'updated_at' => $this->updated_at ?? null,
         ];
 
         return $dataResponse;

@@ -52,16 +52,18 @@ class StudentEnrollmentController extends Controller
                     'student_enrollments.id as id',
                     'student_enrollments.classroom_id',
                     'student_enrollments.user_id',
+                    'student_enrollments.created_at',
+                    'student_enrollments.updated_at',
 
-                    'users.id as user_id',
+                    // 'users.id as user_id',
                     'users.name as user_name',
                     'users.username as user_username',
                     'users.role as user_role',
                     'users.avatar as user_avatar',
 
-                    'classrooms.id as classroom_id',
+                    // 'classrooms.id as classroom_id',
                     'classrooms.name as classroom_name',
-                    'classrooms.grade as classroom_grade'
+                    'classrooms.grade as classroom_grade',
                 );
             }
 
