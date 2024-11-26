@@ -25,8 +25,8 @@ class AssignNewStudentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'userID' => 'numeric|required|exists:users,id',
-            'classroomID' => 'numeric|required|exists:classrooms,id',
+            'user_id' => 'numeric|required|exists:users,id',
+            'classroom_id' => 'numeric|required|exists:classrooms,id',
         ];
     }
 

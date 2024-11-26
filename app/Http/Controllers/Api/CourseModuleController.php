@@ -27,7 +27,7 @@ class CourseModuleController extends Controller
     // LMS-109
     public function index(Request $request)
     {
-        $courseID = $request->query('courseID');
+        $courseID = $request->query('course_id');
 
         //get modules
         try {
@@ -101,7 +101,7 @@ class CourseModuleController extends Controller
         // ini belum return data join ke table course, module, jadi return response nya masih table course module aja
         // object course ada, tapi ke isi yang course.id aja, kalau course.name, dll pasti null value nya (karena belum di-join)
         $courseModule = CourseModule::create([
-            'course_id' => $validatedRequest['courseID'],
+            'course_id' => $validatedRequest['course_id'],
             'module_id' => $module->id,
         ]);
 

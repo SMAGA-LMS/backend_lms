@@ -25,9 +25,9 @@ class AddNewClassEnrollmentRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'courseID'     => 'required|numeric|exists:courses,id',
-            'classroomID'  => 'required|numeric|exists:classrooms,id',
-            'userID'       => 'required|numeric|exists:users,id',
+            'course_id'     => 'required|numeric|exists:courses,id',
+            'classroom_id'  => 'required|numeric|exists:classrooms,id',
+            'user_id'       => 'required|numeric|exists:users,id',
         ];
     }
 

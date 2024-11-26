@@ -30,7 +30,7 @@ class CourseController extends Controller
     // // pakai query param /courses?userID=xxx
     public function index(Request $request)
     {
-        $picCourseID = $request->query('userID');
+        $picCourseID = $request->query('user_id');
 
         //get courses
         try {
@@ -192,7 +192,7 @@ class CourseController extends Controller
 
         $validatedNewCourse = $request->validated();
 
-        $teacher = $validatedNewCourse['userID'] ?? null;
+        $teacher = $validatedNewCourse['user_id'] ?? null;
 
         // hindari value null tapi dijadiin string, lebih baik tipe data NULL aja
         // if ($teacher == null) {
@@ -253,7 +253,7 @@ class CourseController extends Controller
         // $course->update([
         //     'user_id' => $request->user_id,
         // ]);
-        $userID = $validatedTeacher['userID'] ?? null;
+        $userID = $validatedTeacher['user_id'] ?? null;
         if ($userID != null) {
             $userID = (int)$userID;
         }

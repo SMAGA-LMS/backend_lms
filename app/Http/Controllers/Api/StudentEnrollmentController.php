@@ -27,9 +27,9 @@ class StudentEnrollmentController extends Controller
         // //get class
         // $classes = StudentEnrollment::all();
 
-        $classroomID = $request->query('classroomID');
+        $classroomID = $request->query('classroom_id');
 
-        $isAvailable = $request->query('isAvailable');
+        $isAvailable = $request->query('is_available');
         if ($isAvailable == true) {
             return $this->getAvailableStudents($classroomID);
         }
@@ -125,8 +125,8 @@ class StudentEnrollmentController extends Controller
         //create student enrollment
         try {
             // Check if the student is already enrolled in the classroom
-            $existingEnrollment = StudentEnrollment::where('user_id', $validatedRequest['userID'])
-                ->where('classroom_id', $validatedRequest['classroomID'])
+            $existingEnrollment = StudentEnrollment::where('user_id', $validatedRequest['user_id'])
+                ->where('classroom_id', $validatedRequest['classroom_id'])
                 ->first();
 
             if ($existingEnrollment) {
@@ -141,8 +141,8 @@ class StudentEnrollmentController extends Controller
             // ini belum return data join ke table user, jadi return response nya masih table student_enrollment aja
             // object user ada, tapi ke isi yang user.id aja, kalau user.name, dll pasti null value nya (karena belum di-join)
             $newStudentEnrollment = StudentEnrollment::create([
-                'user_id'     => $validatedRequest['userID'],
-                'classroom_id' => $validatedRequest['classroomID'],
+                'user_id'     => $validatedRequest['user_id'],
+                'classroom_id' => $validatedRequest['classroom_id'],
             ]);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(

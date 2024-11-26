@@ -27,7 +27,7 @@ class AuthenticationController extends Controller
     // LMS-71
     public function login(LoginRequest $request)
     {
-        $deviceName = $request->input('deviceName');
+        $deviceName = $request->input('device_name');
         if (empty($deviceName)) $deviceName = "can't detect device";
 
         $credentials = $request->validated();

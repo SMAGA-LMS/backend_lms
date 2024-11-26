@@ -25,7 +25,7 @@ class AssignNewTeacherRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'userID' => 'required|numeric|exists:users,id',
+            'user_id' => 'required|numeric|exists:users,id',
         ];
     }
 

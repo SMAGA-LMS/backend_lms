@@ -25,8 +25,8 @@ class AddNewCourseModuleRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'courseID'      => 'required|numeric|exists:courses,id',
-            // 'moduleID'     => 'required|numeric|exists:modules,id',  // moduleID diambil dari hasil create module baru
+            'course_id'      => 'required|numeric|exists:courses,id',
+            // 'module_id'     => 'required|numeric|exists:modules,id',  // moduleID diambil dari hasil create module baru
 
             'name' => 'required',
             'description' => 'required',

@@ -30,8 +30,8 @@ class ClassEnrollmentController extends Controller
         //get class
         // $courses = ClassEnrollment::all();
 
-        $teacherID = $request->query('userID');
-        $classroomID = $request->query('classroomID');
+        $teacherID = $request->query('user_id');
+        $classroomID = $request->query('classroom_id');
         try {
             $classEnrollmentsQuery = DB::table('class_enrollments')
                 ->leftJoin('classrooms', 'class_enrollments.classroom_id', '=', 'classrooms.id')
@@ -219,9 +219,9 @@ class ClassEnrollmentController extends Controller
             // ini belum return data join ke table user, jadi return response nya masih table class enrollment aja
             // object user ada, tapi ke isi yang user.id aja, kalau user.name, dll pasti null value nya (karena belum di-join)
             $newClassEnrollment = ClassEnrollment::create([
-                'course_id'     => $validatedRequest['courseID'],
-                'classroom_id' => $validatedRequest['classroomID'],
-                'user_id'       => $validatedRequest['userID'],
+                'course_id'     => $validatedRequest['course_id'],
+                'classroom_id' => $validatedRequest['classroom_id'],
+                'user_id'       => $validatedRequest['user_id'],
             ]);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
@@ -263,7 +263,7 @@ class ClassEnrollmentController extends Controller
             );
         }
 
-        $userID = $validatedTeacher['userID'];
+        $userID = $validatedTeacher['user_id'];
 
         try {
             $classEnrollment->update([
