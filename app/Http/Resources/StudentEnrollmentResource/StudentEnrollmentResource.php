@@ -36,8 +36,8 @@ class StudentEnrollmentResource extends JsonResource
             'classroom' => $classroom ? new ClassroomResource($classroom) : null,
             'user' => $user ? new UserResource($user) : null,
 
-            'created_at' => $this->created_at ?? null,
-            'updated_at' => $this->updated_at ?? null,
+            'createdAt' => $this->created_at ?? null,
+            'updatedAt' => $this->updated_at ?? null,
         ];
 
         return $responseData;

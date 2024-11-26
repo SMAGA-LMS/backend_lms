@@ -20,8 +20,8 @@ class ClassroomResource extends JsonResource
             'name' => $this->name,
             'grade' => $this->grade,
 
-            'created_at' => $this->created_at ?? null,
-            'updated_at' => $this->updated_at ?? null,
+            'createdAt' => $this->created_at ?? null,
+            'updatedAt' => $this->updated_at ?? null,
         ];
 
         return $dataResponse;

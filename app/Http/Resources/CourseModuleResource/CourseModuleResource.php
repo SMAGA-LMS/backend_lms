@@ -41,8 +41,8 @@ class CourseModuleResource extends JsonResource
             'course' => $course ? new CourseResource($course) : null,
             'module' => $module ? new ModuleResource($module) : null,
 
-            'created_at' => $this->created_at ?? null,
-            'updated_at' => $this->updated_at ?? null,
+            'createdAt' => $this->created_at ?? null,
+            'updatedAt' => $this->updated_at ?? null,
         ];
 
         return $dataResponse;

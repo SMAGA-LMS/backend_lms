@@ -36,8 +36,8 @@ class ModuleResource extends JsonResource
             // 'course' => $this->course_id ? new CourseResource($course) : null, // read database/migrations/2024_08_07_130656_create_modules_table.php
             'file' => $this->file ? url('storage/Modules/' . $this->file) : null,
 
-            'created_at' => $this->created_at ?? null,
-            'updated_at' => $this->updated_at ?? null,
+            'createdAt' => $this->created_at ?? null,
+            'updatedAt' => $this->updated_at ?? null,
         ];
 
         return $dataResponse;
