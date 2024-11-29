@@ -16,20 +16,23 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthenticationController extends Controller
 {
-    protected $apiResponse;
+    private $apiResponse;
+    private $user;
 
-    public function __construct(ApiResponseHelper $apiResponse)
+    public function __construct(ApiResponseHelper $apiResponse, User $user)
     {
         $this->apiResponse = $apiResponse;
+        $this->user = $user;
     }
 
     // LMS-71
     public function login(LoginRequest $request)
     {
-        $deviceName = $request->input('device_name');
+        $validatedRequest = $request->validated();
+
+        $deviceName = $validatedRequest['device_name'] ?? null;
         if (empty($deviceName)) $deviceName = "can't detect device";
 
-        $credentials = $request->validated();
 
         // CHANGE: pindah ke LoginRequest rules()
         // $validator = Validator::make($request->all(), [
@@ -42,24 +45,24 @@ class AuthenticationController extends Controller
         //     return response()->json($validator->errors(), 422);
         // }
 
+        $credentials = [
+            'username' => $validatedRequest['username'],
+            'password' => $validatedRequest['password'],
+        ];
         $user = $this->validateUserCredentials($credentials);
 
-        // if (!$result->isSuccess) {
-        //     return $this->apiResponse->errorResponse(
-        //         message: $result->message,
-        //         errors: $result->errors,
-        //         codeResponse: $result->codeResponse
-        //     );
-        // }
+        if (empty($user)) {
+            return $this->apiResponse->errorResponse(
+                message: "Authentication failed",
+                errors: [
+                    'Username or password is incorrect'
+                ],
+                codeResponse: 401
+            );
+        }
 
-        // $user = $result->data;
-        $token = $this->generateToken($user, $deviceName);
+        $token = $this->user->generateToken($user, $deviceName);
 
-        // return $this->apiResponse->successResponse(
-        //     message: $result->message,
-        //     data: new LoginResource($user, $token),
-        //     codeResponse: $result->codeResponse
-        // );
         return $this->apiResponse->successResponse(
             message: "Success Login",
             data: new LoginResource($user, $token),
@@ -94,24 +97,12 @@ class AuthenticationController extends Controller
     private function validateUserCredentials($credentials)
     {
         if (!Auth::attempt($credentials)) {
-            return $this->apiResponse->errorResponse(
-                message: "Authentication failed",
-                errors: [
-                    'Username or password is incorrect'
-                ],
-                codeResponse: 401
-            );
+            return null;
         }
 
         $user = Auth::user();
 
         return $user;
-    }
-
-    // bagian dari LMS-71
-    private function generateToken(User $user, $deviceName)
-    {
-        return $user->createToken($deviceName)->plainTextToken;
     }
 
     // LMS-64

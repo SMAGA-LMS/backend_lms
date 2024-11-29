@@ -30,6 +30,7 @@ class LoginRequest extends FormRequest
             // CHANGE: id to username
             'username'      => 'required',
             'password'     => 'required',
+            'device_name' => 'nullable'
         ];
     }
 
