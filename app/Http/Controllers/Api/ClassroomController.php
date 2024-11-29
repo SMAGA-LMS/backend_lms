@@ -18,11 +18,13 @@ use PhpParser\Node\Stmt\TryCatch;
 
 class ClassroomController extends Controller
 {
-    protected $apiResponse;
+    private $apiResponse;
+    private $classroom;
 
-    public function __construct(ApiResponseHelper $apiResponse)
+    public function __construct(ApiResponseHelper $apiResponse, Classroom $classroom)
     {
         $this->apiResponse = $apiResponse;
+        $this->classroom = $classroom;
     }
 
     // LMS-73
@@ -32,7 +34,7 @@ class ClassroomController extends Controller
         // CHANGE: ganti nama variable $classes jadi $classrooms
         // samain kayak model, dan table database
         try {
-            $classrooms = Classroom::all();
+            $classrooms = $this->classroom->getClassroomsByCondition([]);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "Failed to retrieve list of classrooms.",
@@ -67,7 +69,7 @@ class ClassroomController extends Controller
 
         //find classroom by ID
         try {
-            $classroom = Classroom::find($id);
+            $classroom = $this->classroom->getClassroomByID($id);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "Failed to retrieve classroom.",
@@ -117,10 +119,11 @@ class ClassroomController extends Controller
 
         //create classroom
         try {
-            $classroom = Classroom::create([
-                'name'     => $validatedNewClassroom['name'],
+            $data = [
+                'name' => $validatedNewClassroom['name'],
                 'grade' => $validatedNewClassroom['grade'],
-            ]);
+            ];
+            $newClassroomID = $this->classroom->insertNewClassroom($data);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "Failed to create new classroom.",
@@ -129,11 +132,13 @@ class ClassroomController extends Controller
             );
         }
 
+        $newClassroom = $this->classroom->getClassroomByID($newClassroomID);
+
         //return response
         // return new ClassroomResource(true, 'New Class added', $classes);
         return $this->apiResponse->successResponse(
             message: "New classroom added.",
-            data: new ClassroomResource($classroom),
+            data: new ClassroomResource($newClassroom),
             codeResponse: 201
         );
     }
