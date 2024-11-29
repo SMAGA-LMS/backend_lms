@@ -21,6 +21,7 @@ class Classroom extends Model
     const VALUE_FIELD = 1;
     public function getClassroomsByCondition(array $conditions = [], $isCollection = true)
     {
+        $conditions = array_filter($conditions);
         $query = DB::table($this->table);
 
         foreach ($conditions as $field => $value) {
