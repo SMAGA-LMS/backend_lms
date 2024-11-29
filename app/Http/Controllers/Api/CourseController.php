@@ -232,8 +232,16 @@ class CourseController extends Controller
             $course = $this->course->getCourseByID($id);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
-                message: "Course not found.",
+                message: "Failed to retrieve course.",
                 errors: $th->getMessage(),
+                codeResponse: 404
+            );
+        }
+
+        if ($course == null) {
+            return $this->apiResponse->errorResponse(
+                message: "Course not found.",
+                errors: ['Course not found'],
                 codeResponse: 404
             );
         }

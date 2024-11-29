@@ -37,6 +37,7 @@ class Course extends Model
             );
 
         foreach ($conditions as $field => $value) {
+            $field = $this->table . '.' . $field;
             if (is_array($value)) {
                 $query->where($field, $value[self::OPERATOR], $value[self::VALUE_FIELD]);
             } else {
