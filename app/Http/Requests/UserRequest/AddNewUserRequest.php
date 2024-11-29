@@ -30,7 +30,7 @@ class AddNewUserRequest extends FormRequest
             'name'      => 'required|string|min:5|max:64',
             'role'      => ['required', Rule::in([UserRoleEnum::ADMIN, UserRoleEnum::STUDENT, UserRoleEnum::TEACHER, 'TESTING'])],
             'avatar'     => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'password'     => 'required',
+            // 'password'     => 'required',  // password samakan dengan generate username
         ];
     }
 

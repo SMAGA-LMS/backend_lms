@@ -17,20 +17,44 @@ use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    protected $apiResponse;
+    private $apiResponse;
+    private $user;
 
-    public function __construct(ApiResponseHelper $apiResponse)
+    public function __construct(ApiResponseHelper $apiResponse, User $user)
     {
         $this->apiResponse = $apiResponse;
+        $this->user = $user;
     }
 
     // LMS-69
-    // pakai query param /users?role=RoleName
+    // pakai query param /users?role=xxx
     public function index(Request $request)
     {
-        $role = $request->query('role');
-        if (!isset($role) || $role === '') return $this->getAllUserList();
-        else return $this->getSpecificUserList($role);
+        $filterFields = ['role'];
+        $filters = [];
+
+        foreach ($filterFields as $field) {
+            if ($request->query($field)) {
+                $filters[$field] = $request->query($field);
+            }
+        }
+
+        // array_filter untuk menghapus elemen array yang kosong, null, false, 0, atau string kosong
+        $users = $this->user->getUsersByCondition(array_filter($filters));
+
+        if ($users->isEmpty()) {
+            return $this->apiResponse->successResponse(
+                message: "No users found.",
+                data: [],
+                codeResponse: 200
+            );
+        }
+
+        return $this->apiResponse->successResponse(
+            message: "List of users retrieved successfully.",
+            data: UserResource::collection($users),
+            codeResponse: 200
+        );
 
         // $users = $result->data;
         // return $this->apiResponse->successResponse(
@@ -45,50 +69,6 @@ class UserController extends Controller
 
         // //return collection of users as a resource
         // return new UserResource(true, 'List Data User', $users);
-    }
-
-    // bagian dari LMS-69
-    public function getAllUserList()
-    {
-
-        $users = User::all();
-
-        $message = "List of users retrieved successfully.";
-        if (empty($users)) $message = "No users found.";
-
-        return $this->apiResponse->successResponse(
-            message: $message,
-            data: UserResource::collection($users),
-            codeResponse: 200
-        );
-    }
-
-    // bagian dari LMS-69
-    public function getSpecificUserList(string $role)
-    {
-        if (empty($role)) {
-            return $this->apiResponse->successResponse(
-                message: "No " . $role . " found.",
-                data: [],
-                codeResponse: 200
-            );
-        }
-
-        $users = DB::table('users')->where('role', $role)->get();
-
-        if ($users->isEmpty()) {
-            return $this->apiResponse->successResponse(
-                message: "No " . $role . " found.",
-                data: [],
-                codeResponse: 200
-            );
-        }
-
-        return $this->apiResponse->successResponse(
-            message: "List of " . $users->first()->role . " retrieved successfully.",
-            data: UserResource::collection($users),
-            codeResponse: 200
-        );
     }
 
     // LMS-2, LMS-67
@@ -126,13 +106,16 @@ class UserController extends Controller
         $newUsername = $this->generateUniqueUsername($baseUsername);
 
         //create user
-        $users = User::create([
+        $newUserData = [
             'name'     => $validatedNewUser['name'],
             'username' => $newUsername,
             'role'     => $validatedNewUser['role'],
             'avatar'   => $imageDb,
-            'password' => Hash::make($newUsername),
-        ]);
+            'password' => Hash::make($validatedNewUser['password']),
+        ];
+
+        $newUserID = $this->user->insertNewUser($newUserData);
+        $newUser = $this->user->getUserByID($newUserID);
 
         // $users = DB::insert('insert into users (name, role, avatar, password) values (?, ?, ?, ?)', [$request->name, $request->role, $image->hashName(), Hash::make($request->password)]);
 
@@ -140,7 +123,7 @@ class UserController extends Controller
         // return new UserResource(true, 'New User added', $users);
         return $this->apiResponse->successResponse(
             message: "New user added.",
-            data: new UserResource($users),
+            data: new UserResource($newUser),
             codeResponse: 201
         );
     }
@@ -151,7 +134,13 @@ class UserController extends Controller
         $username = $baseUsername;
         $counter = 1;
 
-        while (User::where('username', $username)->exists()) {
+        $isCollection = false;
+        $isExit = false;
+        while (!$isExit) {
+            $userExist = $this->user->getUsersByCondition(['username' => $username], $isCollection);
+            if (empty($userExist)) {
+                break;
+            }
             $username = $baseUsername . $counter;
             $counter++;
         }

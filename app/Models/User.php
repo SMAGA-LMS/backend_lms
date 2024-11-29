@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
@@ -54,5 +55,32 @@ class User extends Authenticatable
     public function generateToken(User $user, $deviceName)
     {
         return $user->createToken($deviceName)->plainTextToken;
+    }
+
+    const OPERATOR = 0;
+    const VALUE_FIELD = 1;
+    public function getUsersByCondition(array $conditions = [], $isCollection = true)
+    {
+        $query = DB::table($this->table);
+
+        foreach ($conditions as $field => $value) {
+            if (is_array($value)) {
+                $query->where($field, $value[self::OPERATOR], $value[self::VALUE_FIELD]);
+            } else {
+                $query->where($field, $value);
+            }
+        }
+
+        return $isCollection ? $query->get() : $query->first();
+    }
+
+    public function insertNewUser(array $data)
+    {
+        return DB::table($this->table)->insertGetId($data);
+    }
+
+    public function getUserByID($id)
+    {
+        return DB::table($this->table)->where('id', $id)->first();
     }
 }
