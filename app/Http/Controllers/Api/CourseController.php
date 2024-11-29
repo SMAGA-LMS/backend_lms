@@ -19,42 +19,31 @@ use Illuminate\Support\Facades\Hash;
 
 class CourseController extends Controller
 {
-    protected $apiResponse;
+    private $apiResponse;
+    private $course;
 
-    public function __construct(ApiResponseHelper $apiResponse)
+    public function __construct(ApiResponseHelper $apiResponse, Course $course)
     {
         $this->apiResponse = $apiResponse;
+        $this->course = $course;
     }
 
     // LMS-77, LMS-119
-    // // pakai query param /courses?userID=xxx
+    // // pakai query param /courses?user_id=xxx
     public function index(Request $request)
     {
-        $picCourseID = $request->query('user_id');
+        $filterFields = ['user_id'];
+        $filters = [];
+
+        foreach ($filterFields as $field) {
+            if ($request->query($field)) {
+                $filters[$field] = $request->query($field);
+            }
+        }
 
         //get courses
         try {
-            $coursesQuery = DB::table('courses')
-                ->leftJoin('users', 'courses.user_id', '=', 'users.id')
-                ->select(
-                    'courses.id',
-                    'courses.name',
-                    'courses.grade',
-                    'courses.created_at',
-                    'courses.updated_at',
-
-                    'users.id as user_id',
-                    'users.name as user_name',
-                    'users.username as user_username',
-                    'users.role as user_role',
-                    'users.avatar as user_avatar'
-                );
-
-            if (!empty($picCourseID)) {
-                $coursesQuery->where('courses.user_id', $picCourseID);
-            }
-
-            $courses = $coursesQuery->get();
+            $courses = $this->course->getCoursesByCondition($filters);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "Failed to retrieve courses.",
@@ -88,21 +77,15 @@ class CourseController extends Controller
         }
 
         //find course by ID
-        $course = DB::table('courses')
-            ->leftJoin('users', 'courses.user_id', '=', 'users.id')
-            ->select(
-                'courses.id',
-                'courses.name',
-                'courses.grade',
-
-                'users.id as user_id',
-                'users.name as user_name',
-                'users.username as user_username',
-                'users.role as user_role',
-                'users.avatar as user_avatar'
-            )
-            ->where('courses.id', $id)
-            ->first();
+        try {
+            $course = $this->course->getCourseByID($id);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve course.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
+        }
 
         $message = "Course data retrieved successfully.";
         if (empty($course)) $message = "Course not found.";
@@ -194,7 +177,7 @@ class CourseController extends Controller
 
         $validatedNewCourse = $request->validated();
 
-        $teacher = $validatedNewCourse['user_id'] ?? null;
+        $teacherID = $validatedNewCourse['user_id'] ?? null;
 
         // hindari value null tapi dijadiin string, lebih baik tipe data NULL aja
         // if ($teacher == null) {
@@ -203,11 +186,12 @@ class CourseController extends Controller
 
         //create course
         try {
-            $course = Course::create([
-                'user_id'     => $teacher,
+            $data = [
+                'user_id'     => $teacherID,
                 'name' => $validatedNewCourse['name'],
                 'grade' => $validatedNewCourse['grade'],
-            ]);
+            ];
+            $newCourseID = $this->course->insertNewCourse($data);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "Failed to create new course.",
@@ -216,11 +200,13 @@ class CourseController extends Controller
             );
         }
 
+        $newCourse = $this->course->getCourseByID($newCourseID);
+
         //return response
         // return new CourseResource(true, 'New Student-Class added', $course);
         return $this->apiResponse->successResponse(
             message: "New course added.",
-            data: new CourseResource($course),
+            data: new CourseResource($newCourse),
             codeResponse: 201
         );
     }
@@ -239,11 +225,11 @@ class CourseController extends Controller
         //     return response()->json($validator->errors(), 422);
         // }
 
-        $validatedTeacher = $request->validated();
+        $validatedRequest = $request->validated();
 
         // $course = Course::find($id);
         try {
-            $course = Course::find($id);
+            $course = $this->course->getCourseByID($id);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "Course not found.",
@@ -255,17 +241,13 @@ class CourseController extends Controller
         // $course->update([
         //     'user_id' => $request->user_id,
         // ]);
-        $userID = $validatedTeacher['user_id'] ?? null;
-        if ($userID != null) {
-            $userID = (int)$userID;
-        }
-
         try {
             // ini belum return data join ke table user, jadi return response nya masih table course aja
             // object user ada, tapi ke isi yang user.id aja, kalau user.name, dll pasti null value nya (karena belum di-join)
-            $course->update([
-                'user_id' => $userID,
-            ]);
+            $data = [
+                'user_id' => $validatedRequest['user_id'],
+            ];
+            $this->course->updateCourse($id, $data);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "Failed to assign new teacher.",
@@ -274,11 +256,13 @@ class CourseController extends Controller
             );
         }
 
+        $updatedCourse = $this->course->getCourseByID($id);
+
         // //return response
         // return new CourseResource(true, 'New Teacher added', $course);
         return $this->apiResponse->successResponse(
             message: "Teacher updated.",
-            data: new CourseResource($course),
+            data: new CourseResource($updatedCourse),
             codeResponse: 200
         );
     }

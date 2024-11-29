@@ -21,6 +21,8 @@ class CourseResource extends JsonResource
             'username' => $this->user_username ?? null,
             'role' => $this->user_role ?? null,
             'avatar' => $this->user_avatar ?? null,
+            'created_at' => $this->user_created_at ?? null,
+            'updated_at' => $this->user_updated_at ?? null,
         ] : null;
 
         $dataResponse = [
