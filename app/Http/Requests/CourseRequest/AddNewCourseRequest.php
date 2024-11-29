@@ -28,7 +28,7 @@ class AddNewCourseRequest extends FormRequest
     {
         return [
             'name'     => 'required|string',
-            'user_id' => 'string|nullable',
+            'user_id' => 'numeric|nullable',
             'grade' => ['required', Rule::in([GradeEnum::X, GradeEnum::XI, GradeEnum::XII])],
         ];
     }
