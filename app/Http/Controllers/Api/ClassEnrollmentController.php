@@ -17,11 +17,13 @@ use Illuminate\Support\Facades\Hash;
 
 class ClassEnrollmentController extends Controller
 {
-    protected $apiResponse;
+    private $apiResponse;
+    private $classEnrollment;
 
-    public function __construct(ApiResponseHelper $apiResponse)
+    public function __construct(ApiResponseHelper $apiResponse, ClassEnrollment $classEnrollment)
     {
         $this->apiResponse = $apiResponse;
+        $this->classEnrollment = $classEnrollment;
     }
 
     // LMS-15, LMS-99, LMS-94, LMS-121
@@ -30,51 +32,17 @@ class ClassEnrollmentController extends Controller
         //get class
         // $courses = ClassEnrollment::all();
 
-        $teacherID = $request->query('user_id');
-        $classroomID = $request->query('classroom_id');
+        $filterFields = ['user_id', 'classroom_id'];
+        $filters = [];
+
+        foreach ($filterFields as $field) {
+            if ($request->query($field)) {
+                $filters[$field] = $request->query($field);
+            }
+        }
+
         try {
-            $classEnrollmentsQuery = DB::table('class_enrollments')
-                ->leftJoin('classrooms', 'class_enrollments.classroom_id', '=', 'classrooms.id')
-                ->leftJoin('courses', 'class_enrollments.course_id', '=', 'courses.id')
-                ->leftJoin('users', 'class_enrollments.user_id', '=', 'users.id')
-                ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
-                ->select(
-                    'class_enrollments.id as id',
-                    'class_enrollments.course_id',
-                    'class_enrollments.classroom_id',
-
-                    'classrooms.id as classroom_id',
-                    'classrooms.name as classroom_name',
-                    'classrooms.grade as classroom_grade',
-
-                    'courses.id as course_id',
-                    'courses.name as course_name',
-                    'courses.user_id as course_user_id',
-                    'courses.grade as course_grade',
-
-                    'users.id as user_id',
-                    'users.name as user_name',
-                    'users.username as user_username',
-                    'users.role as user_role',
-                    'users.avatar as user_avatar',
-
-                    'pic_courses.id as pic_course_id',
-                    'pic_courses.name as pic_course_name',
-                    'pic_courses.username as pic_course_username',
-                    'pic_courses.role as pic_course_role',
-                    'pic_courses.avatar as pic_course_avatar',
-                );
-
-            // get class enrollments by teacher ID
-            if (!empty($teacherID)) {
-                $classEnrollmentsQuery->where('class_enrollments.user_id', $teacherID);
-            }
-
-            if (!empty($classroomID)) {
-                $classEnrollmentsQuery->where('class_enrollments.classroom_id', $classroomID);
-            }
-
-            $classEnrollments = $classEnrollmentsQuery->get();
+            $classEnrollments = $this->classEnrollment->getClassEnrollmentsByCondition($filters);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "An error occurred while fetching class enrollments",
@@ -108,38 +76,7 @@ class ClassEnrollmentController extends Controller
 
         //find class enrollment by ID
         // $classenr = ClassEnrollment::find($id);
-        $classEnrollment = DB::table('class_enrollments')
-            ->leftJoin('classrooms', 'class_enrollments.classroom_id', '=', 'classrooms.id')
-            ->leftJoin('courses', 'class_enrollments.course_id', '=', 'courses.id')
-            ->leftJoin('users', 'class_enrollments.user_id', '=', 'users.id')
-            ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
-            ->select(
-                'class_enrollments.id as id',
-                'class_enrollments.course_id',
-                'class_enrollments.classroom_id',
-                'classrooms.id as classroom_id',
-                'classrooms.name as classroom_name',
-                'classrooms.grade as classroom_grade',
-
-                'courses.id as course_id',
-                'courses.name as course_name',
-                'courses.user_id as course_user_id',
-                'courses.grade as course_grade',
-
-                'users.id as user_id',
-                'users.name as user_name',
-                'users.username as user_username',
-                'users.role as user_role',
-                'users.avatar as user_avatar',
-
-                'pic_courses.id as pic_course_id',
-                'pic_courses.name as pic_course_name',
-                'pic_courses.username as pic_course_username',
-                'pic_courses.role as pic_course_role',
-                'pic_courses.avatar as pic_course_avatar',
-            )
-            ->where('class_enrollments.id', $id)
-            ->first();
+        $classEnrollment = $this->classEnrollment->getClassEnrollmentByID($id);
 
         $message = "Class enrollments data retrieved successfully.";
         if (empty($classEnrollment)) $message = "Class enrollment not found.";
@@ -150,8 +87,16 @@ class ClassEnrollmentController extends Controller
         // } else {
         //     return new ClassEnrollmentResource(true, 'Detail Class-Course', $classenr);
         // }
+        if ($classEnrollment == null) {
+            return $this->apiResponse->errorResponse(
+                message: "Class enrollment not found.",
+                errors: ['Class enrollment not found.'],
+                codeResponse: 404
+            );
+        }
+
         return $this->apiResponse->successResponse(
-            message: "Class enrollment data retrieved successfully.",
+            message: $message,
             data: new ClassEnrollmentResource($classEnrollment),
             codeResponse: 200
         );
@@ -216,13 +161,12 @@ class ClassEnrollmentController extends Controller
 
         try {
             //create class
-            // ini belum return data join ke table user, jadi return response nya masih table class enrollment aja
-            // object user ada, tapi ke isi yang user.id aja, kalau user.name, dll pasti null value nya (karena belum di-join)
-            $newClassEnrollment = ClassEnrollment::create([
+            $data = [
                 'course_id'     => $validatedRequest['course_id'],
                 'classroom_id' => $validatedRequest['classroom_id'],
                 'user_id'       => $validatedRequest['user_id'],
-            ]);
+            ];
+            $newClassEnrollmentID = $this->classEnrollment->insertNewClassEnrollment($data);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "An error occurred while creating class enrollment",
@@ -230,6 +174,8 @@ class ClassEnrollmentController extends Controller
                 codeResponse: 500
             );
         }
+
+        $newClassEnrollment = $this->classEnrollment->getClassEnrollmentByID($newClassEnrollmentID);
 
         //return response
         // return new ClassEnrollmentResource(true, 'New Class-Course added', $classes);
@@ -251,24 +197,31 @@ class ClassEnrollmentController extends Controller
             );
         }
 
-        $validatedTeacher = $request->validated();
+        $validatedRequest = $request->validated();
 
         try {
-            $classEnrollment = ClassEnrollment::find($id);
+            $classEnrollment = $this->classEnrollment->getClassEnrollmentByID($id);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
-                message: "Class Enrollment not found.",
+                message: "Failed to retrieve class enrollment.",
                 errors: $th->getMessage(),
                 codeResponse: 404
             );
         }
 
-        $userID = $validatedTeacher['user_id'];
+        if ($classEnrollment == null) {
+            return $this->apiResponse->errorResponse(
+                message: "Class enrollment not found.",
+                errors: ['Class enrollment not found'],
+                codeResponse: 404
+            );
+        }
 
         try {
-            $classEnrollment->update([
-                'user_id' => $userID,
-            ]);
+            $data = [
+                'user_id' => $validatedRequest['user_id'],
+            ];
+            $this->classEnrollment->updateClassEnrollment($id, $data);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: "Failed to assign new teacher.",
@@ -277,9 +230,11 @@ class ClassEnrollmentController extends Controller
             );
         }
 
+        $updatedClassEnrollment = $this->classEnrollment->getClassEnrollmentByID($id);
+
         return $this->apiResponse->successResponse(
             message: "Teacher updated.",
-            data: new ClassEnrollmentResource($classEnrollment),
+            data: new ClassEnrollmentResource($updatedClassEnrollment),
             codeResponse: 200
         );
     }
