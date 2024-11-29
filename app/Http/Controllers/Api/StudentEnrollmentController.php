@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StudentEnrollmentRequest\AssignNewStudentRequest;
+use App\Http\Resources\StudentEnrollmentResource\AvailableStudentsResource;
 use App\Http\Resources\StudentEnrollmentResource\StudentEnrollmentResource;
 use App\Http\Resources\UserResource\UserResource;
 use Illuminate\Http\Request;
@@ -14,11 +15,15 @@ use App\Models\User;
 
 class StudentEnrollmentController extends Controller
 {
-    protected $apiResponse;
+    private $apiResponse;
+    private $studentEnrollment;
+    private $user;
 
-    public function __construct(ApiResponseHelper $apiResponse)
+    public function __construct(ApiResponseHelper $apiResponse, StudentEnrollment $studentEnrollment, User $user)
     {
         $this->apiResponse = $apiResponse;
+        $this->studentEnrollment = $studentEnrollment;
+        $this->user = $user;
     }
 
     // LMS-89, LMS-92
@@ -27,51 +32,29 @@ class StudentEnrollmentController extends Controller
         // //get class
         // $classes = StudentEnrollment::all();
 
-        $classroomID = $request->query('classroom_id');
+        $filterFields = ['classroom_id'];
+        $filters = [];
+
+        foreach ($filterFields as $field) {
+            if ($request->query($field)) {
+                $filters[$field] = $request->query($field);
+            }
+        }
 
         $isAvailable = $request->query('is_available');
         if ($isAvailable == true) {
-            return $this->getAvailableStudents($classroomID);
+            if (empty($filters['classroom_id'])) {
+                return $this->apiResponse->errorResponse(
+                    message: 'Classroom ID is required to get available students.',
+                    errors: ['Classroom ID is required'],
+                    codeResponse: 400
+                );
+            }
+            return $this->getAvailableStudents($filters);
         }
 
         try {
-            $studentEnrollmentsQuery = DB::table('student_enrollments')
-                ->join('users', 'student_enrollments.user_id', '=', 'users.id')
-                ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id');
-
-            if (!empty($classroomID)) {
-                $studentEnrollmentsQuery->select(
-                    'users.id as id',
-                    'users.name as name',
-                    'users.username as username',
-                    'users.role as role',
-                    'users.avatar as avatar'
-                );
-            } else {
-                $studentEnrollmentsQuery->select(
-                    'student_enrollments.id as id',
-                    'student_enrollments.classroom_id',
-                    'student_enrollments.user_id',
-                    'student_enrollments.created_at',
-                    'student_enrollments.updated_at',
-
-                    // 'users.id as user_id',
-                    'users.name as user_name',
-                    'users.username as user_username',
-                    'users.role as user_role',
-                    'users.avatar as user_avatar',
-
-                    // 'classrooms.id as classroom_id',
-                    'classrooms.name as classroom_name',
-                    'classrooms.grade as classroom_grade',
-                );
-            }
-
-            if (!empty($classroomID)) {
-                $studentEnrollmentsQuery->where('classroom_id', $classroomID);
-            }
-
-            $studentEnrollments = $studentEnrollmentsQuery->get();
+            $studentEnrollments = $this->studentEnrollment->getStudentEnrollmentsByCondition($filters);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: 'An error occurred while fetching student enrollments',
@@ -85,14 +68,6 @@ class StudentEnrollmentController extends Controller
 
         // //return collection of users as a resource
         // return new StudentEnrollmentResource(true, 'List Data Student-Class', $classes);
-        // if classroomID exists, return UserResource
-        if (!empty($classroomID)) {
-            return $this->apiResponse->successResponse(
-                message: $message,
-                data: UserResource::collection($studentEnrollments),
-                codeResponse: 200
-            );
-        }
 
         // otherwise (classroomID not exists from query param), return StudentEnrollmentResource
         return $this->apiResponse->successResponse(
@@ -127,9 +102,7 @@ class StudentEnrollmentController extends Controller
         //create student enrollment
         try {
             // Check if the student is already enrolled in the classroom
-            $existingEnrollment = StudentEnrollment::where('user_id', $validatedRequest['user_id'])
-                ->where('classroom_id', $validatedRequest['classroom_id'])
-                ->first();
+            $existingEnrollment = $this->studentEnrollment->getEnrolledUser($validatedRequest['user_id'], $validatedRequest['classroom_id']);
 
             if ($existingEnrollment) {
                 return $this->apiResponse->errorResponse(
@@ -142,10 +115,11 @@ class StudentEnrollmentController extends Controller
             // Create new student enrollment
             // ini belum return data join ke table user, jadi return response nya masih table student_enrollment aja
             // object user ada, tapi ke isi yang user.id aja, kalau user.name, dll pasti null value nya (karena belum di-join)
-            $newStudentEnrollment = StudentEnrollment::create([
+            $data = [
                 'user_id'     => $validatedRequest['user_id'],
                 'classroom_id' => $validatedRequest['classroom_id'],
-            ]);
+            ];
+            $newStudentEnrollmentID = $this->studentEnrollment->insertNewStudentEnrollment($data);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
                 message: 'An error occurred while assigning a new student',
@@ -153,6 +127,8 @@ class StudentEnrollmentController extends Controller
                 codeResponse: 500
             );
         }
+
+        $newStudentEnrollment = $this->studentEnrollment->getStudentEnrollmentByID($newStudentEnrollmentID);
 
         //return response
         // return new StudentEnrollmentResource(true, 'New Student-Class added', $classes);
@@ -238,12 +214,9 @@ class StudentEnrollmentController extends Controller
 
     // LMS-92
     // note: dapetin list student yang belum terdaftar di kelas tersebut (classroomID), biar ga duplicate student yang sama di kelas yang sama
-    public function getAvailableStudents($classroomID)
+    public function getAvailableStudents($filters)
     {
-        // $validatedRequest = $request->validated();
-        // $classroomID = $validatedRequest['classroomID'];
-
-        if (!is_numeric($classroomID) || intval($classroomID) != $classroomID) {
+        if (!is_numeric($filters['classroom_id']) || intval($filters['classroom_id']) != $filters['classroom_id']) {
             return $this->apiResponse->errorResponse(
                 message: "Invalid Classroom ID.",
                 errors: ['Invalid Classroom ID'],
@@ -251,16 +224,25 @@ class StudentEnrollmentController extends Controller
             );
         }
 
-        $listOfEnrolledUsersID = StudentEnrollment::where('classroom_id', $classroomID)->pluck('user_id');
+        $filtersByClassroomID = ['classroom_id' => $filters['classroom_id']];
+        $listOfEnrolledUsers = $this->studentEnrollment->getStudentEnrollmentsByCondition($filtersByClassroomID);
+        $classroom = (object) [
+            'id' => $listOfEnrolledUsers[0]->classroom_id ?? null,
+            'name' => $listOfEnrolledUsers[0]->classroom_name ?? null,
+            'grade' => $listOfEnrolledUsers[0]->classroom_grade ?? null,
+            'created_at' => $listOfEnrolledUsers[0]->classroom_created_at ?? null,
+            'updated_at' => $listOfEnrolledUsers[0]->classroom_updated_at ?? null,
+        ];
 
-        $availableUsers = User::whereNotIn('id', $listOfEnrolledUsersID)->get();
+        $listOfEnrolledUsersID = $listOfEnrolledUsers->pluck('user_id')->toArray();
+        $availableStudents = $this->user->getAvailableStudents($listOfEnrolledUsersID);
 
         $message = "List of available users retrieved successfully.";
-        if ($availableUsers->isEmpty()) $message = "No available user found.";
+        if ($availableStudents->isEmpty()) $message = "No available user found.";
 
         return $this->apiResponse->successResponse(
             message: $message,
-            data: UserResource::collection($availableUsers),
+            data: new AvailableStudentsResource($classroom, $availableStudents),
             codeResponse: 200
         );
     }

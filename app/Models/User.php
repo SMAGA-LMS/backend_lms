@@ -84,4 +84,12 @@ class User extends Authenticatable
     {
         return DB::table($this->table)->where('id', $id)->first();
     }
+
+    public function getAvailableStudents($listOfEnrolledUsersID)
+    {
+        return DB::table($this->table)
+            ->whereNotIn('id', $listOfEnrolledUsersID)
+            ->where('role', 'STUDENT')
+            ->get();
+    }
 }
