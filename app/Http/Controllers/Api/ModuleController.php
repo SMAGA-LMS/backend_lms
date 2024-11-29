@@ -16,21 +16,21 @@ use Illuminate\Support\Facades\Hash;
 
 class ModuleController extends Controller
 {
-    protected $apiResponse;
+    private $apiResponse;
+    private $module;
 
-    public function __construct(ApiResponseHelper $apiResponse)
+    public function __construct(ApiResponseHelper $apiResponse, Module $module)
     {
         $this->apiResponse = $apiResponse;
+        $this->module = $module;
     }
 
     // LMS-22
     public function index()
     {
-        // $courseID = $request->query('courseID');
-
         //get modules
         try {
-            $modules = Module::all();
+            $modules = $this->module->getModulesByCondition();
 
             // read database/migrations/2024_08_07_130656_create_modules_table.php
             // $modulesQuery = DB::table('modules')
@@ -98,6 +98,14 @@ class ModuleController extends Controller
         $validatedRequest = $request->validated();
         $module = $this->createNewModule($validatedRequest, $request);
 
+        if ($module == null) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to add new module",
+                errors: ['Failed to add new module'],
+                codeResponse: 500
+            );
+        }
+
         // return new ModuleResource(true, 'New Module added', $modules);
         return $this->apiResponse->successResponse(
             message: "New Module added",
@@ -119,12 +127,20 @@ class ModuleController extends Controller
         }
 
         //create module
-        return Module::create([
-            'name'     => $validatedRequest['name'],
-            'description'   => $validatedRequest['description'],
-            'file'     => $moduleDb,
-            // 'course_id' => $validatedRequest['courseID'] // read database/migrations/2024_08_07_130656_create_modules_table.php
-        ]);
+        try {
+            $data = [
+                'name' => $validatedRequest['name'],
+                'description' => $validatedRequest['description'],
+                'file' => $moduleDb,
+                // 'course_id' => $validatedRequest['courseID'] // read database/migrations/2024_08_07_130656_create_modules_table.php
+            ];
+            $newModuleID = $this->module->insertNewModule($data);
+        } catch (\Throwable $th) {
+            return null;
+        }
+        $newModule = $this->module->getModuleByID($newModuleID);
+
+        return $newModule;
     }
 
     // LMS-115
@@ -140,7 +156,7 @@ class ModuleController extends Controller
 
         //find post by ID
         try {
-            $module = Module::find($id);
+            $module = $this->module->getModuleByID($id);
 
             // read database/migrations/2024_08_07_130656_create_modules_table.php
             // $module = DB::table('modules')
