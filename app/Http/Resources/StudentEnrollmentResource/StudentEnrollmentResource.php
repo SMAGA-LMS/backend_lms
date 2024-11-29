@@ -20,6 +20,8 @@ class StudentEnrollmentResource extends JsonResource
             'id' => $this->classroom_id,
             'name' => $this->classroom_name ?? null,
             'grade' => $this->classroom_grade ?? null,
+            'created_at' => $this->classroom_created_at ?? null,
+            'updated_at' => $this->classroom_updated_at ?? null,
         ] : null;
 
         $user = $this->user_id ? (object)[
@@ -28,6 +30,8 @@ class StudentEnrollmentResource extends JsonResource
             'username' => $this->user_username ?? null,
             'role' => $this->user_role ?? null,
             'avatar' => $this->user_avatar ?? null,
+            'created_at' => $this->user_created_at ?? null,
+            'updated_at' => $this->user_updated_at ?? null,
         ] : null;
 
         $responseData = [
