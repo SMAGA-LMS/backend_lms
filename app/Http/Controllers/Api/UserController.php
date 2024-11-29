@@ -40,7 +40,7 @@ class UserController extends Controller
         }
 
         // array_filter untuk menghapus elemen array yang kosong, null, false, 0, atau string kosong
-        $users = $this->user->getUsersByCondition(array_filter($filters));
+        $users = $this->user->getUsersByCondition($filters);
 
         if ($users->isEmpty()) {
             return $this->apiResponse->successResponse(
