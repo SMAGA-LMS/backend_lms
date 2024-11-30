@@ -41,35 +41,6 @@ class CourseModuleController extends Controller
 
         //get modules
         try {
-            // $courseModulesQuery = DB::table('course_modules')
-            //     ->join('modules', 'course_modules.module_id', '=', 'modules.id')
-            //     ->join('courses', 'course_modules.course_id', '=', 'courses.id')
-            //     ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
-            //     ->select(
-            //         'course_modules.id',
-
-            //         'modules.id as module_id',
-            //         'modules.name as module_name',
-            //         'modules.description as module_description',
-            //         'modules.file as module_file',
-
-            //         'courses.id as course_id',
-            //         'courses.name as course_name',
-            //         'courses.user_id as course_user_id',
-            //         'courses.grade as course_grade',
-
-            //         'pic_courses.id as pic_course_id',
-            //         'pic_courses.name as pic_course_name',
-            //         'pic_courses.username as pic_course_username',
-            //         'pic_courses.role as pic_course_role',
-            //         'pic_courses.avatar as pic_course_avatar',
-            //     );
-
-            // if (!empty($courseID)) {
-            //     $courseModulesQuery->where('course_id', $courseID);
-            // }
-
-            // $courseModules = $courseModulesQuery->get();
             $courseModules = $this->courseModule->getCourseModulesByCondition($filters);
         } catch (\Exception $e) {
             return $this->apiResponse->errorResponse(
