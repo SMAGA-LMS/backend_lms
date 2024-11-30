@@ -35,7 +35,7 @@ class AvailableStudentsResource extends JsonResource
 
         $responseData = [
             'classroom' => $classroom ? new ClassroomResource($classroom) : null,
-            'user' => $this->users ? UserResource::collection($this->users) : null,
+            'users' => $this->users ? UserResource::collection($this->users) : null,
         ];
 
         return $responseData;
