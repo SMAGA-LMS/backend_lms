@@ -77,6 +77,7 @@ class User extends Authenticatable
 
     public function insertNewUser(array $data)
     {
+        $data['created_at'] = now();
         return DB::table($this->table)->insertGetId($data);
     }
 

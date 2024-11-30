@@ -63,6 +63,7 @@ class StudentEnrollment extends Model
 
     public function insertNewStudentEnrollment(array $data)
     {
+        $data['created_at'] = now();
         return DB::table($this->table)->insertGetId($data);
     }
 

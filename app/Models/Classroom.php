@@ -37,6 +37,7 @@ class Classroom extends Model
 
     public function insertNewClassroom(array $data)
     {
+        $data['created_at'] = now();
         return DB::table($this->table)->insertGetId($data);
     }
 

@@ -68,6 +68,7 @@ class Course extends Model
 
     public function insertNewCourse(array $data)
     {
+        $data['created_at'] = now();
         return DB::table($this->table)->insertGetId($data);
     }
 

@@ -66,6 +66,7 @@ class CourseModule extends Model
 
     public function insertNewCourseModule(array $data)
     {
+        $data['created_at'] = now();
         return DB::table($this->table)->insertGetId($data);
     }
 

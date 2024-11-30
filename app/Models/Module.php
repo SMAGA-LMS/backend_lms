@@ -39,6 +39,7 @@ class Module extends Model
 
     public function insertNewModule(array $data)
     {
+        $data['created_at'] = now();
         return DB::table($this->table)->insertGetId($data);
     }
 
