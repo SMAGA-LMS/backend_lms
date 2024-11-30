@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\ClassEnrollmentController;
+use App\Http\Controllers\Api\ClassEnrollmentModuleController;
 use App\Http\Controllers\Api\ClassroomController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\CourseModuleController;
@@ -46,6 +47,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/modules', ModuleController::class);
 
     Route::apiResource('/course-modules', CourseModuleController::class);
+
+    Route::apiResource('/class-enrollment-modules', ClassEnrollmentModuleController::class);
 
     // Route::apiResource('/attendances', AttendanceController::class);
 
