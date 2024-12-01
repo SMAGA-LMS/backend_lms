@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\ClassEnrollment;
 use App\Http\Resources\ClassEnrollmentResource\ClassEnrollmentResource;
+use App\Http\Resources\ClassEnrollmentResource\StudentClassEnrollmentsResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;

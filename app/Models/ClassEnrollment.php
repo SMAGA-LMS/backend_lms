@@ -130,6 +130,7 @@ class ClassEnrollment extends Model
             ->join('student_enrollments', 'class_enrollments.classroom_id', '=', 'student_enrollments.classroom_id')
             ->leftJoin('classrooms', 'class_enrollments.classroom_id', '=', 'classrooms.id')
             ->leftJoin('courses', 'class_enrollments.course_id', '=', 'courses.id')
+            ->leftJoin('users', 'class_enrollments.user_id', '=', 'users.id')
             ->select(
                 'class_enrollments.*',
 
@@ -143,6 +144,13 @@ class ClassEnrollment extends Model
                 'courses.grade as course_grade',
                 'courses.created_at as course_created_at',
                 'courses.updated_at as course_updated_at',
+
+                'users.name as user_name',
+                'users.username as user_username',
+                'users.role as user_role',
+                'users.avatar as user_avatar',
+                'users.created_at as user_created_at',
+                'users.updated_at as user_updated_at',
             )
             ->where('student_enrollments.user_id', $userID)
             ->get();
