@@ -31,34 +31,6 @@ class ModuleController extends Controller
         //get modules
         try {
             $modules = $this->module->getModulesByCondition();
-
-            // read database/migrations/2024_08_07_130656_create_modules_table.php
-            // $modulesQuery = DB::table('modules')
-            // ->join('courses', 'modules.course_id', '=', 'courses.id')
-            // ->leftJoin('users as pic_courses', 'courses.user_id', '=', 'pic_courses.id')
-            // ->select(
-            //     'modules.id',
-            //     'modules.name',
-            //     'modules.description',
-            //     'modules.file',
-
-            //     'courses.id as course_id',
-            //     'courses.name as course_name',
-            //     'courses.user_id as course_user_id',
-            //     'courses.grade as course_grade',
-
-            //     'pic_courses.id as pic_course_id',
-            //     'pic_courses.name as pic_course_name',
-            //     'pic_courses.username as pic_course_username',
-            //     'pic_courses.role as pic_course_role',
-            //     'pic_courses.avatar as pic_course_avatar',
-            // );
-
-            // if (!empty($courseID)) {
-            //     $modulesQuery->where('course_id', $courseID);
-            // }
-
-            // $modules = $modulesQuery->get();
         } catch (\Exception $e) {
             return $this->apiResponse->errorResponse(
                 message: "Failed to retrieve modules",
