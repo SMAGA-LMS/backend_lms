@@ -61,13 +61,13 @@ class ClassEnrollmentModule extends Model
                 'pic_courses.created_at as pic_course_created_at',
                 'pic_courses.updated_at as pic_course_updated_at',
 
-                'teachers.id as teachers_id',
-                'teachers.name as teachers_name',
-                'teachers.username as teachers_username',
-                'teachers.role as teachers_role',
-                'teachers.avatar as teachers_avatar',
-                'teachers.created_at as teachers_created_at',
-                'teachers.updated_at as teachers_updated_at',
+                'teachers.id as teacher_id',
+                'teachers.name as teacher_name',
+                'teachers.username as teacher_username',
+                'teachers.role as teacher_role',
+                'teachers.avatar as teacher_avatar',
+                'teachers.created_at as teacher_created_at',
+                'teachers.updated_at as teacher_updated_at',
             );
 
         foreach ($conditions as $field => $value) {
@@ -129,13 +129,13 @@ class ClassEnrollmentModule extends Model
                 'pic_courses.created_at as pic_course_created_at',
                 'pic_courses.updated_at as pic_course_updated_at',
 
-                'teachers.id as teachers_id',
-                'teachers.name as teachers_name',
-                'teachers.username as teachers_username',
-                'teachers.role as teachers_role',
-                'teachers.avatar as teachers_avatar',
-                'teachers.created_at as teachers_created_at',
-                'teachers.updated_at as teachers_updated_at',
+                'teachers.id as teacher_id',
+                'teachers.name as teacher_name',
+                'teachers.username as teacher_username',
+                'teachers.role as teacher_role',
+                'teachers.avatar as teacher_avatar',
+                'teachers.created_at as teacher_created_at',
+                'teachers.updated_at as teacher_updated_at',
             )
             ->where('class_enrollment_modules.id', $id)
             ->first();
