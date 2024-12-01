@@ -238,4 +238,35 @@ class ClassEnrollmentController extends Controller
             codeResponse: 200
         );
     }
+
+    // LMS-132
+    public function getStudentClassEnrollment($userID)
+    {
+        if (!is_numeric($userID) || intval($userID) != $userID) {
+            return $this->apiResponse->errorResponse(
+                message: "Invalid User ID",
+                errors: ['Invalid User ID'],
+                codeResponse: 400
+            );
+        }
+
+        try {
+            $classEnrollments = $this->classEnrollment->getStudentClassEnrollment($userID);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "An error occurred while fetching class enrollments for the student",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+        $message = "List of class enrollment for student with ID: " . $userID . " retrieved successfully.";
+        if (empty($classEnrollments)) $message = "No class enrollment found.";
+
+        return $this->apiResponse->successResponse(
+            message: $message,
+            data: ClassEnrollmentResource::collection($classEnrollments),
+            codeResponse: 200
+        );
+    }
 }

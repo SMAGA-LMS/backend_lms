@@ -122,4 +122,29 @@ class ClassEnrollment extends Model
             ->where('id', $id)
             ->update($data);
     }
+
+    // butuh join ke course, dan classroom
+    public function getStudentClassEnrollment($userID)
+    {
+        return DB::table($this->table)
+            ->join('student_enrollments', 'class_enrollments.classroom_id', '=', 'student_enrollments.classroom_id')
+            ->leftJoin('classrooms', 'class_enrollments.classroom_id', '=', 'classrooms.id')
+            ->leftJoin('courses', 'class_enrollments.course_id', '=', 'courses.id')
+            ->select(
+                'class_enrollments.*',
+
+                'classrooms.name as classroom_name',
+                'classrooms.grade as classroom_grade',
+                'classrooms.created_at as classroom_created_at',
+                'classrooms.updated_at as classroom_updated_at',
+
+                'courses.name as course_name',
+                'courses.user_id as course_user_id',
+                'courses.grade as course_grade',
+                'courses.created_at as course_created_at',
+                'courses.updated_at as course_updated_at',
+            )
+            ->where('student_enrollments.user_id', $userID)
+            ->get();
+    }
 }
