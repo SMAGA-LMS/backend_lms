@@ -38,7 +38,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/classrooms', ClassroomController::class);
 
     Route::apiResource('/student-enrollments', StudentEnrollmentController::class);
-    Route::get('/student-enrollments/student/{studentID}/classroom', [StudentEnrollmentController::class, 'studentClassroom']);
 
     Route::apiResource('/courses', CourseController::class);
 

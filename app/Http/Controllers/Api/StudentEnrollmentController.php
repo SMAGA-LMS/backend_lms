@@ -26,13 +26,13 @@ class StudentEnrollmentController extends Controller
         $this->user = $user;
     }
 
-    // LMS-89, LMS-92
+    // LMS-89, LMS-92, LMS-122
     public function index(Request $request)
     {
         // //get class
         // $classes = StudentEnrollment::all();
 
-        $filterFields = ['classroom_id'];
+        $filterFields = ['classroom_id', 'user_id'];
         $filters = [];
 
         foreach ($filterFields as $field) {
@@ -139,7 +139,7 @@ class StudentEnrollmentController extends Controller
         );
     }
 
-    // LMS-13 => move to [LMS-69]
+    // LMS-13 => move to [LMS-89]
     // CHANGE: move to index() with query parameter classroomID
     // public function studentList(Request $request)
     // {
@@ -154,63 +154,63 @@ class StudentEnrollmentController extends Controller
     //     }
     // }
 
-    // LMS-122
+    // LMS-122 => move to [LMS-92]
     // note: student terdaftar di kelas mana aja
-    public function studentClassroom($studentID)
-    {
-        //get users
-        // $users = DB::table('student_enrollments')->where('user_id', $request->user_id)->get();
-        // $users = StudentEnrollment::where('user_id', $request->user_id)->first();
+    // public function studentClassroom($studentID)
+    // {
+    //     //get users
+    //     // $users = DB::table('student_enrollments')->where('user_id', $request->user_id)->get();
+    //     // $users = StudentEnrollment::where('user_id', $request->user_id)->first();
 
-        try {
-            $studentEnrollment = DB::table('student_enrollments')
-                ->join('users', 'student_enrollments.user_id', '=', 'users.id')
-                ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
-                ->select(
-                    'student_enrollments.id as id',
-                    'student_enrollments.classroom_id',
-                    'student_enrollments.user_id',
+    //     try {
+    //         $studentEnrollment = DB::table('student_enrollments')
+    //             ->join('users', 'student_enrollments.user_id', '=', 'users.id')
+    //             ->join('classrooms', 'student_enrollments.classroom_id', '=', 'classrooms.id')
+    //             ->select(
+    //                 'student_enrollments.id as id',
+    //                 'student_enrollments.classroom_id',
+    //                 'student_enrollments.user_id',
 
-                    'users.id as user_id',
-                    'users.name as user_name',
-                    'users.username as user_username',
-                    'users.role as user_role',
-                    'users.avatar as user_avatar',
+    //                 'users.id as user_id',
+    //                 'users.name as user_name',
+    //                 'users.username as user_username',
+    //                 'users.role as user_role',
+    //                 'users.avatar as user_avatar',
 
-                    'classrooms.id as classroom_id',
-                    'classrooms.name as classroom_name',
-                    'classrooms.grade as classroom_grade'
-                )
-                ->where('student_enrollments.user_id', $studentID)
-                ->first();
-        } catch (\Throwable $th) {
-            return $this->apiResponse->errorResponse(
-                message: 'An error occurred while fetching student enrollments',
-                errors: $th->getMessage(),
-                codeResponse: 500
-            );
-        }
+    //                 'classrooms.id as classroom_id',
+    //                 'classrooms.name as classroom_name',
+    //                 'classrooms.grade as classroom_grade'
+    //             )
+    //             ->where('student_enrollments.user_id', $studentID)
+    //             ->first();
+    //     } catch (\Throwable $th) {
+    //         return $this->apiResponse->errorResponse(
+    //             message: 'An error occurred while fetching student enrollments',
+    //             errors: $th->getMessage(),
+    //             codeResponse: 500
+    //         );
+    //     }
 
-        if ($studentEnrollment == null) {
-            return $this->apiResponse->errorResponse(
-                message: 'Student Enrollment not found.',
-                errors: ['Student Enrollment not found'],
-                codeResponse: 404
-            );
-        }
+    //     if ($studentEnrollment == null) {
+    //         return $this->apiResponse->errorResponse(
+    //             message: 'Student Enrollment not found.',
+    //             errors: ['Student Enrollment not found'],
+    //             codeResponse: 404
+    //         );
+    //     }
 
-        // if ($users == "[]") {
-        //     return new StudentEnrollmentResource(false, 'No Students found', $users);
-        // } else {
-        //     //return collection of users as a resource
-        //     return new StudentEnrollmentResource(true, 'Students Class', $users->classroom_id);
-        // }
-        return $this->apiResponse->successResponse(
-            message: 'Student Enrollment in classroom retrieved successfully.',
-            data: new StudentEnrollmentResource($studentEnrollment),
-            codeResponse: 200
-        );
-    }
+    //     // if ($users == "[]") {
+    //     //     return new StudentEnrollmentResource(false, 'No Students found', $users);
+    //     // } else {
+    //     //     //return collection of users as a resource
+    //     //     return new StudentEnrollmentResource(true, 'Students Class', $users->classroom_id);
+    //     // }
+    //     return $this->apiResponse->successResponse(
+    //         message: 'Student Enrollment in classroom retrieved successfully.',
+    //         data: new StudentEnrollmentResource($studentEnrollment),
+    //         codeResponse: 200
+    //     );
+    // }
 
     // LMS-92
     // note: dapetin list student yang belum terdaftar di kelas tersebut (classroomID), biar ga duplicate student yang sama di kelas yang sama
