@@ -106,9 +106,39 @@ class CourseModuleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($courseModuleID)
     {
-        //
+        if (!is_numeric($courseModuleID) || intval($courseModuleID) != $courseModuleID) {
+            return $this->apiResponse->errorResponse(
+                message: "Invalid Course Module ID",
+                errors: ['Invalid Course Module ID'],
+                codeResponse: 400
+            );
+        }
+
+        try {
+            $courseModule = $this->courseModule->getCourseModuleByID($courseModuleID);
+        } catch (\Exception $e) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve course module",
+                errors: $e->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+        if ($courseModule == null) {
+            return $this->apiResponse->errorResponse(
+                message: "Course Module not found",
+                errors: ['Course Module not found'],
+                codeResponse: 404
+            );
+        }
+
+        return $this->apiResponse->successResponse(
+            message: "Course Module found",
+            data: new CourseModuleResource($courseModule),
+            codeResponse: 200
+        );
     }
 
     /**
