@@ -24,9 +24,7 @@ class ClassEnrollmentModuleController extends Controller
         $this->moduleController = $moduleController;
     }
 
-    /**
-     * Display a listing of the resource.
-     */
+    // LMS-113
     public function index(Request $request)
     {
         $filterFields = ['class_enrollment_id'];
@@ -61,9 +59,7 @@ class ClassEnrollmentModuleController extends Controller
         );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    // LMS-131
     public function store(AddNewClassEnrollmentModuleRequest $request)
     {
         $validatedRequest = $request->validated();
@@ -104,12 +100,40 @@ class ClassEnrollmentModuleController extends Controller
         );
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(ClassEnrollmentModule $classEnrollmentModule)
+    // LMS-133
+    public function show($classEnrollmentModuleID)
     {
-        //
+        if (!is_numeric($classEnrollmentModuleID) || intval($classEnrollmentModuleID) != $classEnrollmentModuleID) {
+            return $this->apiResponse->errorResponse(
+                message: "Invalid Class Enrollment Module ID",
+                errors: ['Invalid Class Enrollment Module ID'],
+                codeResponse: 400
+            );
+        }
+
+        try {
+            $classEnrollmentModule = $this->classEnrollmentModule->getClassEnrollmentModuleByID($classEnrollmentModuleID);
+        } catch (\Exception $e) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve course module",
+                errors: $e->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+        if ($classEnrollmentModule == null) {
+            return $this->apiResponse->errorResponse(
+                message: "Class Enrollment Module not found",
+                errors: ['Class Enrollment Module not found'],
+                codeResponse: 404
+            );
+        }
+
+        return $this->apiResponse->successResponse(
+            message: "Course Module found",
+            data: new ClassEnrollmentModuleResource($classEnrollmentModule),
+            codeResponse: 200
+        );
     }
 
     /**

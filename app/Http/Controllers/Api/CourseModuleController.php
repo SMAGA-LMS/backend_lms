@@ -103,9 +103,7 @@ class CourseModuleController extends Controller
         );
     }
 
-    /**
-     * Display the specified resource.
-     */
+    // LMS-111
     public function show($courseModuleID)
     {
         if (!is_numeric($courseModuleID) || intval($courseModuleID) != $courseModuleID) {
