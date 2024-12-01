@@ -180,7 +180,7 @@ class ClassEnrollmentController extends Controller
         //return response
         // return new ClassEnrollmentResource(true, 'New Class-Course added', $classes);
         return $this->apiResponse->successResponse(
-            message: "New enrolled course added",
+            message: "New class enrollment added",
             data: new ClassEnrollmentResource($newClassEnrollment),
             codeResponse: 201
         );
