@@ -25,7 +25,7 @@ class AttendanceController extends Controller
     }
 
 
-    //
+    // LMS-134
     public function index()
     {
         //get users
@@ -35,13 +35,14 @@ class AttendanceController extends Controller
         return new AttendanceResource(true, 'List Data Attendance', $attendance);
     }
 
+    // LMS-136
     public function store(AddNewAttendanceRequest $request)
     {
         // CHANGE: move to AddNewAttendanceRequest
         // $validator = Validator::make($request->all(), [
         //     'students'      => 'required|array',
         //     'students.*.student_id' => 'required',
-        //     'students.*.classenrollment_id' => 'required',
+        //     'students.*.class_enrollment_id' => 'required',
         //     'students.*.date_time' => 'required|date',
         //     'students.*.session' => 'required',
         // ]);
@@ -63,7 +64,7 @@ class AttendanceController extends Controller
                 // Simpan attendance berdasarkan studentID sebagai key
                 $createdAttendances[$items['student_id']] = Attendance::create([
                     'student_id' => $items['student_id'],
-                    'classenrollment_id' => $items['classenrollment_id'],
+                    'class_enrollment_id' => $items['class_enrollment_id'],
                     'date_time' => $items['date_time'],
                     'session' => $items['session'],
                 ]);
@@ -84,9 +85,10 @@ class AttendanceController extends Controller
         );
     }
 
+    // LMS-135
     public function show($id)
     {
-        $module = DB::table('attendances')->where('classenrollment_id', '=', $id)->get();
+        $module = DB::table('attendances')->where('class_enrollment_id', '=', $id)->get();
 
         if ($module->isEmpty()) {
             return new AttendanceResource(false, 'No Attendance found', $module);
@@ -95,19 +97,20 @@ class AttendanceController extends Controller
         }
     }
 
+    // LMS-137
     public function student_ce(Request $request)
     {
 
         $validator = Validator::make($request->all(), [
             'student_id' => 'required',
-            'classenrollment_id' => 'required'
+            'class_enrollment_id' => 'required'
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 422);
         }
 
-        $module = DB::table('attendances')->where('classenrollment_id', '=', $request->classenrollment_id)->where('student_id', '=', $request->student_id)->get();
+        $module = DB::table('attendances')->where('class_enrollment_id', '=', $request->class_enrollment_id)->where('student_id', '=', $request->student_id)->get();
 
         if ($module->isEmpty()) {
             return new AttendanceResource(false, 'No Attendance found', $module);

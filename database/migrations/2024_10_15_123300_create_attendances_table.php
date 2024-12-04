@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('attendances', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('student_id')->nullable();
-            $table->unsignedBigInteger('classenrollment_id')->nullable();
+            $table->unsignedBigInteger('class_enrollment_id')->nullable();
             $table->dateTime('date_time');
             $table->integer('session');
             $table->timestamps();
 
             $table->foreign('student_id')->references('id')->on('users');
-            $table->foreign('classenrollment_id')->references('id')->on('class_enrollments');
+            $table->foreign('class_enrollment_id')->references('id')->on('class_enrollments');
         });
     }
 

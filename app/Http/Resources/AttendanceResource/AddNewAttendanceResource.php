@@ -27,8 +27,8 @@ class AddNewAttendanceResource extends JsonResource
             'avatar' => $resource->student_avatar ?? null,
         ] : null;
 
-        $classEnrollment = $resource->classenrollment_id ? (object) [
-            'id' => $resource->classenrollment_id,
+        $classEnrollment = $resource->class_enrollment_id ? (object) [
+            'id' => $resource->class_enrollment_id,
             // 'classroom' => $this->student_name,
             // 'course' => $this->student_username,
             // 'user' => $this->student_role,
