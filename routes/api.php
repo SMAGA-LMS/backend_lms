@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ClassroomController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\CourseModuleController;
 use App\Http\Controllers\Api\ModuleController;
+use App\Http\Controllers\Api\SessionRecordController;
 use App\Http\Controllers\Api\StudentEnrollmentController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -49,6 +50,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/course-modules', CourseModuleController::class);
 
     Route::apiResource('/class-enrollment-modules', ClassEnrollmentModuleController::class);
+
+    Route::apiResource('/session-records', SessionRecordController::class);
 
     // Route::apiResource('/attendances', AttendanceController::class);
 
