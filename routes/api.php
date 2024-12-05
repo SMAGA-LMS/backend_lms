@@ -51,9 +51,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::apiResource('/class-enrollment-modules', ClassEnrollmentModuleController::class);
 
-    Route::apiResource('/session-records', SessionRecordController::class);
+    // Route::apiResource('/session-records', SessionRecordController::class);
 
-    // Route::apiResource('/attendances', AttendanceController::class);
+    Route::apiResource('/attendances', AttendanceController::class);
 
     // ini get sebener nya
     // Route::post('/attendance/student-ce_list', [AttendanceController::class, 'student_ce']);

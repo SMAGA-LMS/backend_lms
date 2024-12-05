@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\AttendanceRequest;
 
+use App\Enums\AttendanceStatus;
 use App\Helpers\ApiResponseHelper;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Validation\Rule;
 
 class AddNewAttendanceRequest extends FormRequest
 {
@@ -25,11 +27,18 @@ class AddNewAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'class_enrollment_id' => 'required|numeric|exists:class_enrollments,id',
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'date_time' => 'required|date',
+
             'students'     => 'required|array',
-            'students.*.student_id' => 'required|exists:users,id',
-            'students.*.class_enrollment_id' => 'required|exists:class_enrollments,id',
-            'students.*.date_time' => 'required|date',
-            'students.*.session' => 'required|numeric',
+            'students.*.student_id' => 'required|numeric|exists:users,id',
+            'students.*.status' => ['required', Rule::in([AttendanceStatus::PRESENT, AttendanceStatus::ABSENT, AttendanceStatus::SICK, AttendanceStatus::PERMIT, AttendanceStatus::OTHER])],
+
+            // 'students.*.class_enrollment_id' => 'required|exists:class_enrollments,id', // cukup kirim class_enrollment_id sekali aja, ga perlu di setiap student (karena pasti sama untuk batch store student ini)
+            // 'students.*.date_time' => 'required|date',
+            // 'students.*.session' => 'required|numeric',  // ini ga jadi dipakai
         ];
     }
 

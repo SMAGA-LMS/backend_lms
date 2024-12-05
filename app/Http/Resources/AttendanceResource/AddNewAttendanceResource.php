@@ -2,13 +2,22 @@
 
 namespace App\Http\Resources\AttendanceResource;
 
-use App\Http\Resources\ClassEnrollmentResource\ClassEnrollmentResource;
-use App\Http\Resources\UserResource\UserResource;
+use App\Http\Resources\SessionRecordResource\SessionRecordResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+// ga jadi dipakai (belum tau, sebelumnya untuk add new attendance response, tapi kayaknya better langsung collection dari attendances)
 class AddNewAttendanceResource extends JsonResource
 {
+    private $sessionRecord;
+    private $attendances;
+
+    public function __construct($sessionRecord, $attendances)
+    {
+        $this->sessionRecord = $sessionRecord;
+        $this->attendances = $attendances;
+    }
+
     /**
      * Transform the resource into an array.
      *
@@ -16,30 +25,24 @@ class AddNewAttendanceResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
-        // masih ga bisa
-        $resource = is_array($this->resource) ? json_decode(json_encode($this->resource)) : $this->resource;
+        $sessionRecord = $this->sessionRecord->id ? (object)[
+            'id' => $this->sessionRecord->id,
+            'title' => $this->sessionRecord->title ?? null,
+            'description' => $this->sessionRecord->description ?? null,
+            'date_time' => $this->sessionRecord->date_time ?? null,
 
-        $student = $resource->student_id ? (object) [
-            'id' => $resource->student_id,
-            'name' => $resource->student_name ?? null,
-            'username' => $resource->student_username ?? null,
-            'role' => $resource->student_role ?? null,
-            'avatar' => $resource->student_avatar ?? null,
-        ] : null;
+            'class_enrollment_id' => $this->sessionRecord->class_enrollment_id ?? null,
+            'classroom_id' => $this->sessionRecord->classroom_id ?? null,
+            'course_id' => $this->sessionRecord->course_id ?? null,
+            'teacher_id' => $this->sessionRecord->teacher_id ?? null,
 
-        $classEnrollment = $resource->class_enrollment_id ? (object) [
-            'id' => $resource->class_enrollment_id,
-            // 'classroom' => $this->student_name,
-            // 'course' => $this->student_username,
-            // 'user' => $this->student_role,
+            'created_at' => $this->sessionRecord->created_at ?? null,
+            'updated_at' => $this->sessionRecord->updated_at ?? null,
         ] : null;
 
         $dataResponse = [
-            'id' => $resource->id ?? null,
-            'student' => $student ? new UserResource($student) : null,
-            'classEnrollment' => $classEnrollment ? new ClassEnrollmentResource($classEnrollment) : null,
-            'dateTime' => $resource->date_time ?? null,
-            'session' => $resource->session ?? null,
+            'sessionRecord' => $sessionRecord ? new SessionRecordResource($sessionRecord) : null,
+            'attendances' => $this->attendances ? AttendanceResource::collection($this->attendances) : null,
         ];
 
         return $dataResponse;

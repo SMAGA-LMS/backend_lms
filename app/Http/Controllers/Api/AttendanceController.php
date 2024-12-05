@@ -5,8 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AttendanceRequest\AddNewAttendanceRequest;
-use App\Http\Resources\AttendanceResource;
-use App\Http\Resources\AttendanceResource\AddNewAttendanceResource;
+use App\Http\Resources\AttendanceResource\AttendanceResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,14 +13,19 @@ use App\Models\Attendance;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use PhpParser\Node\Stmt\TryCatch;
 
 class AttendanceController extends Controller
 {
-    protected $apiResponse;
+    private $apiResponse;
+    private $sessionRecordController;
+    private $attendance;
 
-    public function __construct(ApiResponseHelper $apiResponse)
+    public function __construct(ApiResponseHelper $apiResponse, SessionRecordController $sessionRecordController, Attendance $attendance)
     {
         $this->apiResponse = $apiResponse;
+        $this->sessionRecordController = $sessionRecordController;
+        $this->attendance = $attendance;
     }
 
 
@@ -35,7 +39,7 @@ class AttendanceController extends Controller
         return new AttendanceResource(true, 'List Data Attendance', $attendance);
     }
 
-    // LMS-136
+    // LMS-136, LMS-117
     public function store(AddNewAttendanceRequest $request)
     {
         // CHANGE: move to AddNewAttendanceRequest
@@ -52,24 +56,43 @@ class AttendanceController extends Controller
         //     return response()->json($validator->errors(), 422);
         // }
 
-        $validatedRequest = $request->validated();
-        $students = $validatedRequest;
-
         // $students = $request->all();
+
+        $validatedRequest = $request->validated();
+
+        DB::beginTransaction();
+
+        // create session record
+        try {
+            $sessionRecordRequest = [
+                'class_enrollment_id' => $validatedRequest['class_enrollment_id'],
+                'title' => $validatedRequest['title'],
+                'description' => $validatedRequest['description'],
+                'date_time' => $validatedRequest['date_time'],
+            ];
+            $newSessionRecord = $this->sessionRecordController->createNewSessionRecord($sessionRecordRequest);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return $this->apiResponse->errorResponse(
+                message: "Failed to create new session record.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
+        }
 
         // create attendance
         try {
-            $createdAttendances = [];
-            foreach ($students['students'] as $items) {
-                // Simpan attendance berdasarkan studentID sebagai key
-                $createdAttendances[$items['student_id']] = Attendance::create([
-                    'student_id' => $items['student_id'],
-                    'class_enrollment_id' => $items['class_enrollment_id'],
-                    'date_time' => $items['date_time'],
-                    'session' => $items['session'],
-                ]);
+            foreach ($validatedRequest['students'] as $student) {
+                $attendanceData = [
+                    'student_id' => $student['student_id'],
+                    'session_record_id' => $newSessionRecord->id,
+                    'status' => $student['status'],
+                ];
+                $newAttendanceID = $this->attendance->insertNewAttendance($attendanceData);
             }
+            DB::commit();
         } catch (\Throwable $th) {
+            DB::rollBack();
             return $this->apiResponse->errorResponse(
                 message: "Failed to insert attendance.",
                 errors: $th->getMessage(),
@@ -77,10 +100,23 @@ class AttendanceController extends Controller
             );
         }
 
+        try {
+            $filters = [
+                'session_record_id' => $newSessionRecord->id
+            ];
+            $newListAttendances = $this->attendance->getAttendancesByCondition($filters);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve attendances.",
+                errors: $th->getMessage(),
+                codeResponse: 404
+            );
+        }
+
         // return new AttendanceResource(true, 'New Attendance added', $students);
         return $this->apiResponse->successResponse(
-            message: "New attendance added successfully.",
-            data: $createdAttendances,
+            message: "New attendances added successfully.",
+            data: AttendanceResource::collection($newListAttendances),
             codeResponse: 201
         );
     }
