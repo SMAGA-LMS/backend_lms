@@ -30,13 +30,42 @@ class AttendanceController extends Controller
 
 
     // LMS-134
-    public function index()
+    public function index(Request $request)
     {
-        //get users
-        $attendance = Attendance::all();
+        // //get users
+        // $attendance = Attendance::all();
+
+        $filterFields = [];
+        $filters = [];
+
+        foreach ($filterFields as $field) {
+            if ($request->query($field)) {
+                $filters[$field] = $request->query($field);
+            }
+        }
+
+        try {
+            $listAttendances = $this->attendance->getAttendancesByCondition($filters);
+        } catch (\Exception $e) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve list attendances.",
+                errors: $e->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+        $message = "List of Attendances";
+        if ($listAttendances->isEmpty()) $message = "Attendances not found";
+
 
         //return collection of users as a resource
-        return new AttendanceResource(true, 'List Data Attendance', $attendance);
+        // return new AttendanceResource(true, 'List Data Attendance', $attendance);
+
+        return $this->apiResponse->successResponse(
+            message: $message,
+            data: AttendanceResource::collection($listAttendances),
+            codeResponse: 200
+        );
     }
 
     // LMS-136, LMS-117
@@ -133,25 +162,44 @@ class AttendanceController extends Controller
         }
     }
 
-    // LMS-137
-    public function student_ce(Request $request)
+    // LMS-137, LMS-145
+    public function getAttendancesForStudent(Request $request, $userID)
     {
+        // $validator = Validator::make($request->all(), [
+        //     'student_id' => 'required',
+        //     'class_enrollment_id' => 'required'
+        // ]);
 
-        $validator = Validator::make($request->all(), [
-            'student_id' => 'required',
-            'class_enrollment_id' => 'required'
-        ]);
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        // $studentID = $request->query('student_id');
+        $classEnrollmentID = $request->query('class_enrollment_id');
+
+        // $module = DB::table('attendances')->where('class_enrollment_id', '=', $request->class_enrollment_id)->where('student_id', '=', $request->student_id)->get();
+        try {
+            $listAttendancesStudent = $this->attendance->getAttendancesForStudent($userID, $classEnrollmentID);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve attendances.",
+                errors: $th->getMessage(),
+                codeResponse: 404
+            );
         }
 
-        $module = DB::table('attendances')->where('class_enrollment_id', '=', $request->class_enrollment_id)->where('student_id', '=', $request->student_id)->get();
+        $message = "List of Attendances for Student";
+        if ($listAttendancesStudent->isEmpty()) $message = "Attendances not found";
 
-        if ($module->isEmpty()) {
-            return new AttendanceResource(false, 'No Attendance found', $module);
-        } else {
-            return new AttendanceResource(true, 'Attendance found', $module);
-        }
+        // if ($module->isEmpty()) {
+        //     return new AttendanceResource(false, 'No Attendance found', $module);
+        // } else {
+        //     return new AttendanceResource(true, 'Attendance found', $module);
+        // }
+        return $this->apiResponse->successResponse(
+            message: $message,
+            data: AttendanceResource::collection($listAttendancesStudent),
+            codeResponse: 200
+        );
     }
 }
