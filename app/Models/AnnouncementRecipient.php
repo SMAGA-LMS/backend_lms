@@ -54,4 +54,30 @@ class AnnouncementRecipient extends Model
 
         return $isCollection ? $query->get() : $query->first();
     }
+
+    public function getAnnouncementRecipientsByID($id)
+    {
+        return DB::table($this->table)
+            ->join('announcements', 'announcement_recipients.announcement_id', '=', 'announcements.id')
+            ->join('users', 'announcements.author_id', '=', 'users.id')
+            ->select(
+                'announcement_recipients.*',
+
+                'announcements.title as announcement_title',
+                'announcements.description as announcement_description',
+                'announcements.file as announcement_file',
+                'announcements.created_at as announcement_created_at',
+                'announcements.updated_at as announcement_updated_at',
+
+                'announcements.author_id as announcement_author_id',
+                'users.name as announcement_author_name',
+                'users.username as announcement_author_username',
+                'users.role as announcement_author_role',
+                'users.avatar as announcement_author_avatar',
+                'users.created_at as announcement_author_created_at',
+                'users.updated_at as announcement_author_updated_at',
+            )
+            ->where('announcement_recipients.id', $id)
+            ->first();
+    }
 }

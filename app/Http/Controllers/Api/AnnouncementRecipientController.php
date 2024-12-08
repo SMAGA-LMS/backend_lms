@@ -63,9 +63,39 @@ class AnnouncementRecipientController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(AnnouncementRecipient $announcementRecipient)
+    public function show($announcementRecipientID)
     {
-        //
+        if (!is_numeric($announcementRecipientID) || intval($announcementRecipientID) != $announcementRecipientID) {
+            return $this->apiResponse->errorResponse(
+                message: "Invalid announcement recipient ID",
+                errors: ['Invalid announcement recipient ID'],
+                codeResponse: 400
+            );
+        }
+
+        try {
+            $announcementRecipient = $this->announcementRecipient->getAnnouncementRecipientsByID($announcementRecipientID);
+        } catch (\Exception $e) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve announcement recipient",
+                errors: $e->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+        if ($announcementRecipient == null) {
+            return $this->apiResponse->errorResponse(
+                message: "Announcement Recipient not found",
+                errors: ['Announcement Recipient not found'],
+                codeResponse: 404
+            );
+        }
+
+        return $this->apiResponse->successResponse(
+            message: "Announcement Recipient found",
+            data: new AnnouncementRecipientResource($announcementRecipient),
+            codeResponse: 200
+        );
     }
 
     /**
