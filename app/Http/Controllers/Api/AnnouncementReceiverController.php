@@ -69,7 +69,7 @@ class AnnouncementReceiverController extends Controller
             $announcementRequest = [
                 'title' => $validatedRequest['title'],
                 'description' => $validatedRequest['description'],
-                'file' => $validatedRequest['file'],
+                'file' => $validatedRequest['file'] ?? null,
                 'author_id' => $validatedRequest['author_id'],
             ];
             $announcement = $this->announcementController->createNewAnnouncement($announcementRequest);
@@ -84,7 +84,7 @@ class AnnouncementReceiverController extends Controller
 
         // create announcement receiver
         try {
-            foreach ($validatedRequest['receiver_role'] as $role) {
+            foreach ($validatedRequest['receiver_roles'] as $role) {
                 $announcementReceiverRequest = [
                     'announcement_id' => $announcement->id,
                     'receiver_role' => $role,
@@ -116,7 +116,7 @@ class AnnouncementReceiverController extends Controller
 
         return $this->apiResponse->successResponse(
             message: "Announcement receiver created",
-            data: new AnnouncementReceiverResource($newAnnouncementReceivers),
+            data: AnnouncementReceiverResource::collection($newAnnouncementReceivers),
             codeResponse: 201
         );
     }
