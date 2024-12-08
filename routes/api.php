@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\AnnouncementController;
+use App\Http\Controllers\Api\AnnouncementRecipientController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\ClassEnrollmentController;
@@ -56,8 +58,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('/attendances', AttendanceController::class);
     Route::get('/attendances/student/{user_id}', [AttendanceController::class, 'getAttendancesForStudent']);
 
-    // ini get sebener nya
-    // Route::post('/attendance/student-ce_list', [AttendanceController::class, 'student_ce']);
+    // Route::apiResource('/announcements', AnnouncementController::class);
+    Route::apiResource('/announcement-recipients', AnnouncementRecipientController::class);
 });
 
 // dipindahin ke atas, pake middleware auth:sanctum
