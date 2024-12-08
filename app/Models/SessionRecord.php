@@ -58,6 +58,8 @@ class SessionRecord extends Model
     {
         return DB::table($this->table)
             ->join('class_enrollments', 'session_records.class_enrollment_id', '=', 'class_enrollments.id')
+            ->join('classrooms', 'class_enrollments.classroom_id', '=', 'classrooms.id')
+            ->join('courses', 'class_enrollments.course_id', '=', 'courses.id')
             ->select(
                 'session_records.*',
 
@@ -66,6 +68,16 @@ class SessionRecord extends Model
                 'class_enrollments.user_id as teacher_id',
                 'class_enrollments.created_at as class_enrollment_created_at',
                 'class_enrollments.updated_at as class_enrollment_updated_at',
+
+                'classrooms.name as classroom_name',
+                'classrooms.grade as classroom_grade',
+                'classrooms.created_at as classroom_created_at',
+                'classrooms.updated_at as classroom_updated_at',
+
+                'courses.name as course_name',
+                'courses.grade as course_grade',
+                'courses.created_at as course_created_at',
+                'courses.updated_at as course_updated_at',
             )
             ->where('session_records.id', $id)
             ->first();
