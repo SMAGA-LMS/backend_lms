@@ -35,7 +35,7 @@ class AttendanceController extends Controller
         // //get users
         // $attendance = Attendance::all();
 
-        $filterFields = [];
+        $filterFields = ['session_record_id'];
         $filters = [];
 
         foreach ($filterFields as $field) {
