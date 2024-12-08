@@ -41,7 +41,8 @@ class AnnouncementReceiver extends Model
                 'users.avatar as announcement_author_avatar',
                 'users.created_at as announcement_author_created_at',
                 'users.updated_at as announcement_author_updated_at',
-            );
+            )
+            ->orderByDesc('announcement_receivers.created_at');
 
         foreach ($conditions as $field => $value) {
             $field = $this->table . '.' . $field;
