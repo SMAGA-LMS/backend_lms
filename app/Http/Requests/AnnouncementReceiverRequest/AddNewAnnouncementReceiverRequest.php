@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\UserRequest;
+namespace App\Http\Requests\AnnouncementReceiverRequest;
 
 use App\Enums\UserRoleEnum;
 use App\Helpers\ApiResponseHelper;
@@ -9,7 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Validation\Rule;
 
-class AddNewUserRequest extends FormRequest
+class AddNewAnnouncementReceiverRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -27,10 +27,12 @@ class AddNewUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'      => 'required|string|min:5|max:64',
-            'role'      => ['required', Rule::in([UserRoleEnum::ADMIN, UserRoleEnum::STUDENT, UserRoleEnum::TEACHER])],
-            'avatar'     => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            // 'password'     => 'required',  // password samakan dengan generate username
+            'title'      => 'required|string',
+            'description' => 'required|string',
+            'file' => 'mimes:xlsx,doc,docx,ppt,pptx,pdf,png,jpeg,jpg|nullable|max:2048',
+            'author_id' => 'required|numeric|exists:users,id',
+
+            'receiver_roles' => ['required', 'array', Rule::in([UserRoleEnum::ADMIN, UserRoleEnum::STUDENT, UserRoleEnum::TEACHER])],
         ];
     }
 

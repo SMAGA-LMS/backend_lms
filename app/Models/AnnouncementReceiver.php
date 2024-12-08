@@ -6,27 +6,27 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class AnnouncementRecipient extends Model
+class AnnouncementReceiver extends Model
 {
     use HasFactory;
 
-    public $table = 'announcement_recipients';
+    public $table = 'announcement_receivers';
 
     protected $fillable = [
         'announcement_id',
-        'recipient_role',
+        'receiver_role',
     ];
 
     const OPERATOR = 0;
     const VALUE_FIELD = 1;
-    public function getAnnouncementRecipientsByCondition(array $conditions = [], $isCollection = true)
+    public function getAnnouncementReceiversByCondition(array $conditions = [], $isCollection = true)
     {
         $conditions = array_filter($conditions);
         $query = DB::table($this->table)
-            ->join('announcements', 'announcement_recipients.announcement_id', '=', 'announcements.id')
+            ->join('announcements', 'announcement_receivers.announcement_id', '=', 'announcements.id')
             ->join('users', 'announcements.author_id', '=', 'users.id')
             ->select(
-                'announcement_recipients.*',
+                'announcement_receivers.*',
 
                 'announcements.title as announcement_title',
                 'announcements.description as announcement_description',
@@ -55,13 +55,13 @@ class AnnouncementRecipient extends Model
         return $isCollection ? $query->get() : $query->first();
     }
 
-    public function getAnnouncementRecipientsByID($id)
+    public function getAnnouncementReceiversByID($id)
     {
         return DB::table($this->table)
-            ->join('announcements', 'announcement_recipients.announcement_id', '=', 'announcements.id')
+            ->join('announcements', 'announcement_receivers.announcement_id', '=', 'announcements.id')
             ->join('users', 'announcements.author_id', '=', 'users.id')
             ->select(
-                'announcement_recipients.*',
+                'announcement_receivers.*',
 
                 'announcements.title as announcement_title',
                 'announcements.description as announcement_description',
@@ -77,7 +77,13 @@ class AnnouncementRecipient extends Model
                 'users.created_at as announcement_author_created_at',
                 'users.updated_at as announcement_author_updated_at',
             )
-            ->where('announcement_recipients.id', $id)
+            ->where('announcement_receivers.id', $id)
             ->first();
+    }
+
+    public function insertNewAnnouncementReceiver(array $data)
+    {
+        $data['created_at'] = now();
+        return DB::table($this->table)->insertGetId($data);
     }
 }

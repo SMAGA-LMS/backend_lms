@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Resources\AnnouncementRecipientResource;
+namespace App\Http\Resources\AnnouncementReceiverResource;
 
 use App\Http\Resources\AnnouncementResource\AnnouncementResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class AnnouncementRecipientResource extends JsonResource
+class AnnouncementReceiverResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -35,7 +35,7 @@ class AnnouncementRecipientResource extends JsonResource
         $dataResponse = [
             'id' => $this->id,
             'announcement' => $announcement ? new AnnouncementResource($announcement) : null,
-            'recipientRole' => $this->recipient_role ?? null,
+            'receiverRole' => $this->receiver_role ?? null,
 
             'createdAt' => $this->created_at ?? null,
             'updatedAt' => $this->updated_at ?? null,
