@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AnnouncementReceiverRequest\AddNewAnnouncementReceiverRequest;
+use App\Http\Resources\AnnouncementReceiverResource\AddNewAnnouncementReceiverResource;
 use App\Http\Resources\AnnouncementReceiverResource\AnnouncementReceiverResource;
 use App\Http\Resources\AnnouncementReceiverResponse\AnnouncementReceiverResponse;
 use App\Models\AnnouncementReceiver;
@@ -63,13 +64,21 @@ class AnnouncementReceiverController extends Controller
     {
         $validatedRequest = $request->validated();
 
+        if ($request->hasFile('file')) {
+            $announcementFile = $request->file('file');
+            $announcementFile->storeAs('public/announcements', $announcementFile->hashName());
+            $announcementFile = $announcementFile->hashName();
+        } else {
+            $announcementFile = null;
+        }
+
         DB::beginTransaction();
 
         try {
             $announcementRequest = [
                 'title' => $validatedRequest['title'],
                 'description' => $validatedRequest['description'],
-                'file' => $validatedRequest['file'] ?? null,
+                'file' => $announcementFile,
                 'author_id' => $validatedRequest['author_id'],
             ];
             $announcement = $this->announcementController->createNewAnnouncement($announcementRequest);
@@ -108,7 +117,7 @@ class AnnouncementReceiverController extends Controller
             $newAnnouncementReceivers = $this->announcementReceiver->getAnnouncementReceiversByCondition($filters);
         } catch (\Throwable $th) {
             return $this->apiResponse->errorResponse(
-                message: "Failed to retrieve announcement receivers",
+                message: "Failed to retrieve announcement receiver",
                 errors: $th->getMessage(),
                 codeResponse: 500
             );
