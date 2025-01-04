@@ -25,11 +25,11 @@ use Illuminate\Support\Facades\Route;
     Route::apiResource('/courses', CourseController::class);
 
     it will create these end point
-    GET /courses → CourseController@index
-    GET /courses/{course} → CourseController@show
-    POST /courses → CourseController@store
-    PUT/PATCH /courses/{course} → CourseController@update
-    DELETE /courses/{course} → CourseController@destroy
+    GET /courses → CourseController@index  -> Route::get('/courses', CourseController::class);
+    GET /courses/{course} → CourseController@show -> Route::get('/courses/{id}', CourseController::class);
+    POST /courses → CourseController@store -> Route::post('/courses', CourseController::class);
+    PUT/PATCH /courses/{course} → CourseController@update -> Route::put('/courses/{id}', CourseController::class);
+    DELETE /courses/{course} → CourseController@destroy -> Route::delete('/courses/{id}', CourseController::class);
 */
 
 //default api
@@ -53,7 +53,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::apiResource('/class-enrollment-modules', ClassEnrollmentModuleController::class);
 
-    Route::apiResource('/session-records', SessionRecordController::class)->except(['store']);
+    // Route::apiResource('/session-records', SessionRecordController::class)->except(['store']);
 
     Route::apiResource('/attendances', AttendanceController::class);
     Route::get('/attendances/student/{user_id}', [AttendanceController::class, 'getAttendancesForStudent']);

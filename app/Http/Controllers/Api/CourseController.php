@@ -234,7 +234,7 @@ class CourseController extends Controller
             return $this->apiResponse->errorResponse(
                 message: "Failed to retrieve course.",
                 errors: $th->getMessage(),
-                codeResponse: 404
+                codeResponse: 500
             );
         }
 

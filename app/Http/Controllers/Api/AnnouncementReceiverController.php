@@ -85,7 +85,7 @@ class AnnouncementReceiverController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             return $this->apiResponse->errorResponse(
-                message: "Failed to create announcement receiver",
+                message: "Failed to create announcement",
                 errors: $th->getMessage(),
                 codeResponse: 500
             );
