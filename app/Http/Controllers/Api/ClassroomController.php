@@ -2,63 +2,144 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Helpers\ApiResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ClassroomRequest\AddNewClassroomRequest;
+use App\Http\Resources\ClassroomResource\ClassroomResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Models\Classroom;
-use App\Http\Resources\ClassroomResource;
+// use App\Http\Resources\ClassroomResource;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Hash;
+use PhpParser\Node\Stmt\TryCatch;
 
 class ClassroomController extends Controller
 {
-    //
+    private $apiResponse;
+    private $classroom;
+
+    public function __construct(ApiResponseHelper $apiResponse, Classroom $classroom)
+    {
+        $this->apiResponse = $apiResponse;
+        $this->classroom = $classroom;
+    }
+
+    // LMS-73
     public function index()
     {
         //get class
-        $classes = Classroom::all();
+        // CHANGE: ganti nama variable $classes jadi $classrooms
+        // samain kayak model, dan table database
+        try {
+            $classrooms = $this->classroom->getClassroomsByCondition([]);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve list of classrooms.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+        $message = "List of classroom retrieved successfully.";
+        if (empty($classrooms)) $message = "No classrooms found.";
+
+        return $this->apiResponse->successResponse(
+            message: $message,
+            data: ClassroomResource::collection($classrooms),
+            codeResponse: 200
+        );
 
         //return collection of users as a resource
-        return new ClassroomResource(true, 'List Data Kelas', $classes);
+        // return new ClassroomResource(true, 'List Data Kelas', $classes);
     }
 
+    // LMS-85
     public function show($id)
     {
-        //find class by ID
-        $class = Classroom::find($id);
-
-        //return single post as a resource
-        if($class==null){
-            return new ClassroomResource(false, 'User not found', $class);
-        }
-        else{
-            return new ClassroomResource(true, 'Detail User', $class);
+        if (!is_numeric($id)) {
+            return $this->apiResponse->errorResponse(
+                message: "Invalid Classroom ID",
+                errors: ['Invalid Classroom ID'],
+                codeResponse: 400
+            );
         }
 
+        //find classroom by ID
+        try {
+            $classroom = $this->classroom->getClassroomByID($id);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to retrieve classroom.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
+        }
+
+
+        // //return single post as a resource
+        // if ($class == null) {
+        //     return new ClassroomResource(false, 'User not found', $class);
+        // } else {
+        //     return new ClassroomResource(true, 'Detail User', $class);
+        // }
+        if ($classroom == null) {
+            return $this->apiResponse->errorResponse(
+                message: "Classroom not found.",
+                errors: ['Classroom not found'],
+                codeResponse: 404
+            );
+        }
+
+        return $this->apiResponse->successResponse(
+            message: "Classroom data retrieved successfully.",
+            data: new ClassroomResource($classroom),
+            codeResponse: 200
+        );
     }
 
-    public function store(Request $request)
+    // LMS-72
+    public function store(AddNewClassroomRequest $request)
     {
+        // CHANGE: pindah ke ClassroomRequest\AddNewClassroomRequest
         //define validation rules
-        $validator = Validator::make($request->all(), [
-            'name'      => 'required',
-            'grade'     => 'required',
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'name'      => 'required',
+        //     'grade'     => 'required',
+        // ]);
 
         //check if validation fails
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors(), 422);
+        // }
+
+        $validatedNewClassroom = $request->validated();
+
+        //create classroom
+        try {
+            $data = [
+                'name' => $validatedNewClassroom['name'],
+                'grade' => $validatedNewClassroom['grade'],
+            ];
+            $newClassroomID = $this->classroom->insertNewClassroom($data);
+        } catch (\Throwable $th) {
+            return $this->apiResponse->errorResponse(
+                message: "Failed to create new classroom.",
+                errors: $th->getMessage(),
+                codeResponse: 500
+            );
         }
 
-        //create class
-        $classes = Classroom::create([
-            'name'     => $request->name,
-            'grade' => $request->grade,
-        ]);
+        $newClassroom = $this->classroom->getClassroomByID($newClassroomID);
 
         //return response
-        return new ClassroomResource(true, 'New Class added', $classes);
+        // return new ClassroomResource(true, 'New Class added', $classes);
+        return $this->apiResponse->successResponse(
+            message: "New classroom added.",
+            data: new ClassroomResource($newClassroom),
+            codeResponse: 201
+        );
     }
 }

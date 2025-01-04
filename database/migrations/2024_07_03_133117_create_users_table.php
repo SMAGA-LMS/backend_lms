@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // ADD: tambahkan kolom username
+        // reason: to make login process easier, instead of using id (integer)
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('username')->unique();
             $table->string('password');
             $table->string('role');
             $table->string('avatar')->nullable();

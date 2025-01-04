@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('student_enrollments', function (Blueprint $table) {
+        Schema::create('class_enrollment_modules', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('classroom_id');
+            $table->unsignedBigInteger('class_enrollment_id');
+            $table->unsignedBigInteger('module_id');
             $table->timestamps();
 
-            $table->foreign('user_id')->references('id')->on('users');
-            $table->foreign('classroom_id')->references('id')->on('classrooms');
+            $table->foreign('class_enrollment_id')->references('id')->on('class_enrollments');
+            $table->foreign('module_id')->references('id')->on('modules');
         });
     }
 
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('student_enrollments');
+        Schema::dropIfExists('class_enrollment_modules');
     }
 };
